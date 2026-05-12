@@ -24,7 +24,9 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 // Google OAuth for Admin (Owner)
 router.get('/google/admin', passport.authenticate('google', { scope: ['profile', 'email'], state: 'admin' }));
 
-const frontendUrl = process.env.NODE_ENV === 'production' ? 'https://boxboxindia.com' : 'http://localhost:5173';
+const frontendUrl = process.env.NODE_ENV === 'production' 
+  ? (process.env.FRONTEND_URL || 'https://boxboxindia.com') 
+  : 'http://localhost:5173';
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: `${frontendUrl}/login?error=OAuthFailed` }), async (req, res, next) => {
   try {

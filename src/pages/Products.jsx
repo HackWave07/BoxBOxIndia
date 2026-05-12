@@ -41,7 +41,7 @@ export default function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/products`);
         const productsArray = Array.isArray(data) ? data : (data?.data || []);
         setProducts(productsArray?.map(p => ({ ...p, id: p._id || p.id })) || []);
       } catch (error) {

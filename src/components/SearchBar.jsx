@@ -33,7 +33,7 @@ export default function SearchBar() {
 
     setLoading(true);
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/products?search=${q}`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/products?search=${q}`, {
         signal: abortControllerRef.current.signal
       });
 

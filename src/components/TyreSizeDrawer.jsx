@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronRight, Loader2, Info } from 'lucide-react';
 import axios from 'axios';
+import { resolveMediaUrl } from '../utils/media';
 
 const TyreSizeDrawer = ({ isOpen, onClose, onSelect, currentProduct }) => {
   const [selectedRim, setSelectedRim] = useState(17);
@@ -88,7 +89,7 @@ const TyreSizeDrawer = ({ isOpen, onClose, onSelect, currentProduct }) => {
           {currentProduct?.images?.[0] && (
             <div style={{ width: '56px', height: '56px', borderRadius: '8px', overflow: 'hidden', background: 'var(--bg)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img
-                src={currentProduct.images[0].startsWith('http') ? currentProduct.images[0] : `http://localhost:5000${currentProduct.images[0]}`}
+                src={resolveMediaUrl(currentProduct.images[0])}
                 alt={currentProduct.name}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={e => { e.currentTarget.style.display = 'none'; }}
