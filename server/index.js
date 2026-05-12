@@ -162,10 +162,18 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 // ─── Mount Routers ────────────────────────────────────────────────────────────
+// Mount routes with and without '/api' prefix to prevent 404s if VITE_API_URL is just the root URL
 app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
+
 app.use('/api/orders', orderRoutes);
+app.use('/orders', orderRoutes);
+
 app.use('/api/payment', paymentRoutes);
+app.use('/payment', paymentRoutes);
+
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // ─── Seed / Reset Admin User ──────────────────────────────────────────────────
 // In development: always resets the admin password so a stale or
@@ -202,7 +210,7 @@ seedAdmin();
 
 // ─── Upload Route ─────────────────────────────────────────────────────────────
 const { protect, authorizeRoles } = require('./middleware/authMiddleware');
-app.post('/api/upload', protect, authorizeRoles('owner'), upload.array('images', 10), (req, res, next) => {
+const uploadHandler = (req, res, next) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
@@ -213,7 +221,10 @@ app.post('/api/upload', protect, authorizeRoles('owner'), upload.array('images',
     console.error('Upload error:', error);
     res.status(500).json({ error: error.message });
   }
-});
+};
+
+app.post('/api/upload', protect, authorizeRoles('owner'), upload.array('images', 10), uploadHandler);
+app.post('/upload', protect, authorizeRoles('owner'), upload.array('images', 10), uploadHandler);
 
 // ─── 404 Catch-all (must be after all routes) ─────────────────────────────────
 app.use((_req, res) => {
