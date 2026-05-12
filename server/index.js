@@ -21,7 +21,7 @@ require('./config/passport')(passport);
 
 // ─── Environment flags ────────────────────────────────────────────────────────
 const isDev = process.env.NODE_ENV !== 'production';
-const FRONTEND_ORIGIN = isDev ? 'http://localhost:5173' : 'https://boxboxindia.com';
+const FRONTEND_ORIGIN = isDev ? 'http://localhost:5173' : (process.env.FRONTEND_URL || 'https://boxboxindia.com');
 
 // ─── Silence Chrome DevTools probe BEFORE helmet/CSP so it is never blocked ──
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
@@ -149,6 +149,11 @@ app.use(session({
 // ─── Passport Middleware ──────────────────────────────────────────────────────
 app.use(passport.initialize());
 app.use(passport.session());
+
+// ─── Health Check ───────────────────────────────────────────────────────────────
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // ─── Route Files ──────────────────────────────────────────────────────────────
 const productRoutes = require('./routes/productRoutes');
