@@ -12,7 +12,7 @@ export default function SearchDropdown({ results, loading, query, visible, selec
   const hasResults = products.length > 0 || categories.length > 0 || brands.length > 0;
 
   const handleRowClick = (item) => {
-    if (item.type === 'product') navigate(`/products/${item.id}`);
+    if (item.type === 'product') navigate(`/product/${item.id}`);
     else if (item.type === 'category') navigate(`/products?category=${item.name}`);
     else if (item.type === 'brand') navigate(`/products?brand=${item.name}`);
     onSelect();
