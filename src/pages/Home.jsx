@@ -5,7 +5,7 @@ import TyreFinder from '../components/TyreFinder';
 import HeroSlider from '../components/HeroSlider';
 import SkeletonCard from '../components/SkeletonCard';
 import { useTheme } from '../context/ThemeContext';
-import { ShieldCheck, Truck, Wrench, Gauge, Mountain, Navigation, Map, Zap, Crosshair, MapPin, Clock, Tent, Shield, Car, Gem, Battery, Star } from 'lucide-react';
+import { ShieldCheck, Truck, Wrench, Gauge, Mountain, Navigation, Map, Zap, Crosshair, MapPin, Clock, Tent, Shield, Car, Gem, Battery, Star, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { getSafeApiUrl } from '../utils/media';
 
@@ -350,10 +350,13 @@ const PerformanceCard = ({ cat, delay }) => {
 export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
+        setLoading(true);
         const { data } = await axios.get(`${API_URL}/products`);
         
         let productsArray = [];
@@ -365,13 +368,18 @@ export default function Home() {
         
         setFeatured(productsArray.slice(0, 4));
         setLoading(false);
+
+        // Fetch featured reviews
+        const reviewsRes = await axios.get(`${API_URL}/reviews/featured`);
+        setReviews(reviewsRes.data);
+        setReviewsLoading(false);
       } catch (error) {
-        console.error('Error fetching products', error);
-        setFeatured([]);
+        console.error('Error fetching home data', error);
         setLoading(false);
+        setReviewsLoading(false);
       }
     };
-    fetchProducts();
+    fetchData();
   }, []);
 
   return (
@@ -615,23 +623,41 @@ export default function Home() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
-            {[
-              { name: 'Rahul Mehta — Royal Enfield Himalayan', review: 'Absolutely flawless fitment. The tyres arrived within 2 days and the grip on the trails is unmatched. Highest recommendation for ADV riders.' },
-              { name: 'Amit Verma — KTM 390 Adventure', review: 'Premium service from start to finish. The BoxBox team confirmed my rim sizes over WhatsApp before shipping. Very rare to see this level of detail.' },
-              { name: 'Sandeep Sharma — Mahindra Thar', review: 'Transformed my Thar completely. Switched out my stock tyres for All-Terrains and the road noise is drastically reduced. Fast delivery pan-India.' }
-            ].map((t, i) => (
-              <div key={i} className="glass-panel animate-lift" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}>
-                    {[...Array(5)].map((_, j) => <Star key={j} size={20} fill="var(--text)" color="var(--text)" />)}
+            {reviewsLoading ? (
+               [...Array(3)].map((_, i) => (
+                <div key={i} className="glass-panel" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', minHeight: '200px' }}>
+                  <div className="skeleton-loader" style={{ height: '20px', width: '40%', marginBottom: '20px' }} />
+                  <div className="skeleton-loader" style={{ height: '60px', width: '100%', marginBottom: '20px' }} />
+                  <div className="skeleton-loader" style={{ height: '20px', width: '30%' }} />
+                </div>
+              ))
+            ) : reviews.length > 0 ? (
+              reviews.map((rev, i) => (
+                <div key={rev._id} className="glass-panel animate-lift" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}>
+                      {[...Array(5)].map((_, j) => <Star key={j} size={20} fill={j < rev.rating ? "var(--text)" : "transparent"} color="var(--text)" />)}
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '18px', lineHeight: '1.6', marginBottom: '32px' }}>"{rev.comment}"</p>
                   </div>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '18px', lineHeight: '1.6', marginBottom: '32px' }}>"{t.review}"</p>
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ fontWeight: '700', color: 'var(--text)', fontSize: '15px' }}>{rev.userName}</p>
+                      {rev.product && (
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Verified Buyer — {rev.product.brand} {rev.product.name}</p>
+                      )}
+                    </div>
+                    {rev.product && (
+                      <Link to={`/product/${rev.product._id}`} style={{ color: 'var(--text)', opacity: 0.5 }}>
+                        <ArrowRight size={18} />
+                      </Link>
+                    )}
+                  </div>
                 </div>
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
-                  <p style={{ fontWeight: '700', color: 'var(--text)', fontSize: '15px' }}>{t.name}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', gridColumn: '1/-1' }}>No verified reviews yet. Join our community to share your experience!</p>
+            )}
           </div>
 
         </div>

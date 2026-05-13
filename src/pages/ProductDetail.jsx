@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { Star, Shield, Info, ShoppingCart, Loader2, CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
+import { Star, Shield, Info, ShoppingCart, Loader2, CheckCircle2, ChevronRight, ArrowRight, Package } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import StickyPurchaseBar from '../components/StickyPurchaseBar';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import TyreSizeDrawer from '../components/TyreSizeDrawer';
 import { resolveMediaUrl } from '../utils/media';
@@ -14,6 +14,10 @@ export default function ProductDetail() {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { addToast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [product, setProduct] = useState(null);
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,11 +27,15 @@ export default function ProductDetail() {
   const [showSticky, setShowSticky] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('');
+  const [reviews, setReviews] = useState([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  
   const heroRef = React.useRef(null);
-  const navigate = useNavigate();
+  const lastScrollY = React.useRef(0);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/products/${id}`);
@@ -35,6 +43,11 @@ export default function ProductDetail() {
         setActiveImage(resolveMediaUrl(data?.images?.[0] || data?.image || ''));
         setSelectedSize(data?.tyreSize || data?.size || '');
 
+        // Fetch real reviews
+        const reviewsRes = await axios.get(`${import.meta.env.VITE_API_URL}/reviews/product/${id}`);
+        setReviews(reviewsRes.data);
+
+        // Recommended products
         const recsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
         let recsArray = [];
         if (Array.isArray(recsResponse.data)) {
@@ -42,37 +55,27 @@ export default function ProductDetail() {
         } else if (recsResponse.data && Array.isArray(recsResponse.data.data)) {
           recsArray = recsResponse.data.data;
         }
-
         setRecommended(recsArray.filter(p => String(p._id) !== String(id)).slice(0, 4));
+        
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching product detail', error);
+        console.error('Error fetching product data', error);
         setLoading(false);
       }
     };
-    fetchProduct();
+    fetchData();
   }, [id]);
-
-  const lastScrollY = React.useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
       if (currentScrollY > 300) {
-        // Past the product section — show on scroll DOWN, hide on scroll UP
-        if (currentScrollY > lastScrollY.current) {
-          setShowSticky(true);  // scrolling down
-        } else {
-          setShowSticky(false); // scrolling up
-        }
+        setShowSticky(currentScrollY > lastScrollY.current);
       } else {
-        setShowSticky(false); // near the top — always hide
+        setShowSticky(false);
       }
-
       lastScrollY.current = currentScrollY;
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -84,35 +87,58 @@ export default function ProductDetail() {
     setZoomPos({ x, y, show: true });
   };
 
-  if (loading) {
-    return <div style={{ minHeight: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Loader2 size={48} className="animate-spin" style={{ color: 'var(--text-muted)' }} /></div>;
-  }
-  if (!product) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--text)' }}>
-        Loading product...
-      </div>
-    );
-  }
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      addToast('Please login to leave a review', 'error');
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
 
-  const gallery = (product?.images && product.images.length > 0 ? product.images : [product?.image || '']).map(resolveMediaUrl);
+    try {
+      setReviewLoading(true);
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/reviews`, {
+        productId: id,
+        rating: newReview.rating,
+        comment: newReview.comment
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
 
-  // Mock Reviews
-  const mockReviews = [
-    { id: 1, user: "Karan S.", rating: 5, date: "October 12, 2023", text: "Exceptional grip on wet tarmac. Instills massive confidence in corners." },
-    { id: 2, user: "Rohan M.", rating: 4, date: "September 05, 2023", text: "Great quality for the price. The durability is holding up nicely after 5000kms." },
-    { id: 3, user: "Arjun V.", rating: 5, date: "August 21, 2023", text: "Exactly as described. Fast shipping and the tyre feels completely premium." }
-  ];
+      setReviews([data, ...reviews]);
+      setNewReview({ rating: 5, comment: '' });
+      addToast('Review submitted successfully!', 'success');
+      
+      const newCount = (product.reviews || 0) + 1;
+      const newRating = ((parseFloat(product.rating || 0) * (product.reviews || 0)) + newReview.rating) / newCount;
+      setProduct({ ...product, rating: newRating.toFixed(1), reviews: newCount });
+      
+    } catch (error) {
+      addToast(error.response?.data?.message || 'Error submitting review', 'error');
+    } finally {
+      setReviewLoading(false);
+    }
+  };
 
   const handleBuyNow = () => {
     addToCart(product);
     navigate('/checkout');
   };
 
+  if (loading) {
+    return <div style={{ minHeight: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Loader2 size={48} className="animate-spin" style={{ color: 'var(--text-muted)' }} /></div>;
+  }
+
+  if (!product) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--text)' }}>Product not found</div>;
+  }
+
+  const gallery = (product?.images && product.images.length > 0 ? product.images : [product?.image || '']).map(resolveMediaUrl);
+
   return (
     <div className="section-full" style={{ paddingTop: '40px', paddingBottom: showSticky ? '90px' : '60px', transition: 'padding-bottom 0.3s ease' }}>
       <div ref={heroRef} className="responsive-two-col" style={{ gap: '24px', marginBottom: '80px', alignItems: 'start' }}>
-
+        
         {/* LEFT: IMAGE GALLERY */}
         <div style={{ position: 'sticky', top: '120px' }}>
           <div
@@ -137,7 +163,7 @@ export default function ProductDetail() {
             <img
               src={activeImage || 'https://via.placeholder.com/500?text=No+Image'}
               onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/500?text=No+Image"; }}
-              alt={product?.name || 'Product Image'}
+              alt={product?.name}
               style={{
                 width: '100%',
                 height: '100%',
@@ -147,8 +173,6 @@ export default function ProductDetail() {
                 opacity: zoomPos.show ? 0 : 1
               }}
             />
-
-            {/* Inner Zoom Layer */}
             {zoomPos.show && (
               <div style={{
                 position: 'absolute',
@@ -163,7 +187,6 @@ export default function ProductDetail() {
             )}
           </div>
 
-          {/* Thumbnails */}
           <div className="scroll-x-mobile" style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '10px' }}>
             {gallery.map((img, i) => (
               <div
@@ -182,16 +205,9 @@ export default function ProductDetail() {
                 }}
               >
                 <img
-                  src={img || 'https://via.placeholder.com/500?text=No+Image'}
-                  onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/500?text=No+Image"; }}
+                  src={img}
                   alt={`thumbnail-${i}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    opacity: activeImage === img ? 1 : 0.6,
-                    transition: 'all 0.3s'
-                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: activeImage === img ? 1 : 0.6 }}
                 />
               </div>
             ))}
@@ -205,11 +221,9 @@ export default function ProductDetail() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Star fill="var(--text)" color="var(--text)" size={18} />
-              <Star fill="var(--text)" color="var(--text)" size={18} />
-              <Star fill="var(--text)" color="var(--text)" size={18} />
-              <Star fill="var(--text)" color="var(--text)" size={18} />
-              <Star fill="transparent" color="var(--text)" size={18} />
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} fill={i < Math.round(product?.rating || 0) ? "var(--text)" : "transparent"} color="var(--text)" size={18} />
+              ))}
               <span style={{ fontWeight: '700', marginLeft: '8px' }}>{product?.rating || 0}</span>
             </div>
             <span style={{ color: 'var(--text-muted)' }}>({product?.reviews || 0} verified reviews)</span>
@@ -221,8 +235,6 @@ export default function ProductDetail() {
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '16px', marginBottom: '24px' }}>
               {product?.description}
             </p>
-
-            {/* Quick Specs inline */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               {product?.specs?.grip && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -244,77 +256,54 @@ export default function ProductDetail() {
             <div
               onClick={() => setIsDrawerOpen(true)}
               className="btn-secondary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '12px',
-                borderColor: 'var(--text)',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'var(--text)';
-                e.currentTarget.style.color = 'var(--bg)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--text)';
-              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', borderColor: 'var(--text)', fontWeight: '700', cursor: 'pointer' }}
             >
               {selectedSize} <ChevronRight size={16} />
             </div>
-            <p style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>
-              Select a different size configuration for this model.
-            </p>
           </div>
 
           <button
             className="btn-primary"
-            style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', transition: 'transform 0.2s', transform: 'scale(1)' }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}
             onClick={() => {
-              if (product) {
-                addToCart(product);
-                addToast(`${product?.name || 'Item'} secured in cart`, 'success');
-              }
+              addToCart(product);
+              addToast(`${product.name} secured in cart`, 'success');
             }}
           >
             <ShoppingCart size={20} />
             Secure Add to Cart
           </button>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '24px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600', flexWrap: 'wrap' }}>
-            <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Shield size={16} /> Secure Checkout</p>
-            <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Info size={16} /> Free Delivery</p>
-          </div>
         </div>
       </div>
 
-      {/* TABS (Specs, Compatibility, Reviews) */}
+      {/* TABS */}
       <div style={{ marginBottom: '80px', marginTop: '40px' }}>
         <div className="scroll-x-mobile" style={{ display: 'flex', gap: '40px', borderBottom: '1px solid var(--border)', marginBottom: '40px', overflowX: 'auto', paddingBottom: '16px' }}>
-          {['specs', 'compatibility', 'reviews'].map(tab => (
+          {['specs', 'compatibility', 'parts', 'reviews'].map(tab => (
             <button
               key={tab}
-              style={{ padding: '0', background: 'none', border: 'none', fontWeight: activeTab === tab ? '800' : '600', color: activeTab === tab ? 'var(--text)' : 'var(--text-muted)', borderBottom: activeTab === tab ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer', fontSize: '18px', textTransform: 'capitalize', whiteSpace: 'nowrap', transition: 'color 0.2s' }}
+              style={{ padding: '0 0 16px 0', background: 'none', border: 'none', fontWeight: activeTab === tab ? '800' : '600', color: activeTab === tab ? 'var(--text)' : 'var(--text-muted)', borderBottom: activeTab === tab ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer', fontSize: '18px', textTransform: 'capitalize' }}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'specs' ? 'Technical Specs' : tab}
+              {tab === 'specs' ? 'Technical Specs' : tab === 'parts' ? 'Related Parts' : tab}
             </button>
           ))}
         </div>
 
         {activeTab === 'specs' && (
-          <div className="glass-panel table-wrap" style={{ padding: '32px', maxWidth: '800px', background: 'var(--bg2)' }}>
+          <div className="glass-panel" style={{ padding: '32px', maxWidth: '800px', background: 'var(--bg2)', borderRadius: '12px', border: '1px solid var(--border)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
-                {[['Brand', product?.brand], ['Category', product?.category], ['Size', product?.tyreSize || product?.size || 'N/A'], ['Grip Level', product?.specs?.grip || 'Standard'], ['Estimated Mileage', product?.specs?.mileage || 'Omitted'], ['Durability Class', product?.specs?.durability || 'Standard']].map(([key, val], i) => (
-                  <tr key={key} style={{ borderBottom: i === 5 ? 'none' : '1px solid var(--border)' }}>
-                    <td style={{ padding: '20px 0', color: 'var(--text-muted)', width: '40%', fontSize: '15px' }}>{key}</td>
-                    <td style={{ padding: '20px 0', fontWeight: '700', fontSize: '16px' }}>{val}</td>
+                {[
+                  ['Brand', product?.brand],
+                  ['Category', product?.category],
+                  ['Size', product?.tyreSize || product?.size || 'N/A'],
+                  ['Grip Level', product?.specs?.grip || 'Standard'],
+                  ['Durability Class', product?.specs?.durability || 'Standard']
+                ].map(([key, val], i) => (
+                  <tr key={key} style={{ borderBottom: i === 4 ? 'none' : '1px solid var(--border)' }}>
+                    <td style={{ padding: '20px 0', color: 'var(--text-muted)', width: '40%' }}>{key}</td>
+                    <td style={{ padding: '20px 0', fontWeight: '700' }}>{val}</td>
                   </tr>
                 ))}
               </tbody>
@@ -323,19 +312,19 @@ export default function ProductDetail() {
         )}
 
         {activeTab === 'compatibility' && (
-          <div className="glass-panel table-wrap" style={{ padding: '32px', maxWidth: '800px', background: 'var(--bg2)' }}>
-            {product?.compatibility && product?.compatibility?.length > 0 ? (
+          <div className="glass-panel" style={{ padding: '32px', maxWidth: '800px', background: 'var(--bg2)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            {product?.compatibility && product.compatibility.length > 0 ? (
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '14px' }}>
-                    <th style={{ paddingBottom: '16px', fontWeight: '600' }}>Vehicle Type</th>
-                    <th style={{ paddingBottom: '16px', fontWeight: '600' }}>Make</th>
-                    <th style={{ paddingBottom: '16px', fontWeight: '600' }}>Model</th>
-                    <th style={{ paddingBottom: '16px', fontWeight: '600' }}>Year</th>
+                    <th style={{ paddingBottom: '16px' }}>Vehicle Type</th>
+                    <th style={{ paddingBottom: '16px' }}>Make</th>
+                    <th style={{ paddingBottom: '16px' }}>Model</th>
+                    <th style={{ paddingBottom: '16px' }}>Year</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {product?.compatibility?.map((c, i) => (
+                  {product.compatibility.map((c, i) => (
                     <tr key={i} style={{ borderBottom: i === product.compatibility.length - 1 ? 'none' : '1px solid var(--border)' }}>
                       <td style={{ padding: '20px 0', fontWeight: '600' }}>{c.vehicleType}</td>
                       <td style={{ padding: '20px 0', fontWeight: '700' }}>{c.brand}</td>
@@ -346,55 +335,111 @@ export default function ProductDetail() {
                 </tbody>
               </table>
             ) : (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>Universal Fitment / No specific vehicle mapped.</p>
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <Info size={40} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+                <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Universal Fitment / No specific vehicle mapped.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'parts' && (
+          <div style={{ maxWidth: '800px' }}>
+            {product?.relatedParts && product.relatedParts.length > 0 ? (
+              <div className="responsive-grid" style={{ gap: '20px' }}>
+                {product.relatedParts.map(part => (
+                  <ProductCard key={part._id} product={{ ...part, id: part._id }} />
+                ))}
+              </div>
+            ) : (
+              <div className="glass-panel" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', textAlign: 'center', background: 'var(--bg2)' }}>
+                <Package size={40} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+                <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>No specific related parts or accessories recommended for this item.</p>
+              </div>
             )}
           </div>
         )}
 
         {activeTab === 'reviews' && (
           <div style={{ maxWidth: '800px' }}>
+            {/* Rating Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '40px', padding: '32px', background: 'var(--bg2)', borderRadius: '12px', border: '1px solid var(--border)', flexWrap: 'wrap' }}>
               <div style={{ textAlign: 'center' }}>
                 <h2 style={{ fontSize: '48px', fontWeight: '900', lineHeight: '1' }}>{product?.rating || 0}</h2>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
-                  <Star fill="var(--text)" color="var(--text)" size={16} />
-                  <Star fill="var(--text)" color="var(--text)" size={16} />
-                  <Star fill="var(--text)" color="var(--text)" size={16} />
-                  <Star fill="var(--text)" color="var(--text)" size={16} />
-                  <Star fill="transparent" color="var(--text)" size={16} />
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} fill={i < Math.round(product?.rating || 0) ? "var(--text)" : "transparent"} color="var(--text)" size={16} />
+                  ))}
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px' }}>Based on {product?.reviews || 0} reviews</p>
               </div>
               <div style={{ flex: 1, borderLeft: '1px solid var(--border)', paddingLeft: '24px' }}>
                 <p style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Verified Purchase Quality</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>All our reviews adhere to strict authenticity guidelines. Buyers must purchase and verify shipping limits before establishing a review onto our premium platform.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>All reviews are from verified owners. We ensure the highest level of authenticity for our rider community.</p>
               </div>
             </div>
 
+            {/* Review Form */}
+            {user ? (
+              <div className="glass-panel" style={{ padding: '32px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '48px' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '24px' }}>Leave a Review</h3>
+                <form onSubmit={handleReviewSubmit}>
+                  <div style={{ marginBottom: '20px' }}>
+                    <p style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Rating</p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button key={star} type="button" onClick={() => setNewReview({ ...newReview, rating: star })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                          <Star fill={star <= newReview.rating ? "var(--text)" : "transparent"} color="var(--text)" size={24} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '24px' }}>
+                    <textarea
+                      required
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                      placeholder="Share your experience..."
+                      style={{ width: '100%', minHeight: '120px', padding: '16px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                  <button type="submit" disabled={reviewLoading} className="btn-primary" style={{ width: 'auto', padding: '12px 32px' }}>
+                    {reviewLoading ? <Loader2 className="animate-spin" size={20} /> : 'Submit Review'}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '32px', background: 'var(--bg2)', borderRadius: '12px', marginBottom: '48px', border: '1px dashed var(--border)' }}>
+                <p style={{ fontWeight: '600', marginBottom: '16px' }}>Login to leave a review</p>
+                <Link to="/login" className="btn-secondary" style={{ display: 'inline-flex', padding: '8px 24px' }}>Login Now</Link>
+              </div>
+            )}
+
+            {/* Review List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {mockReviews.map(rev => (
-                <div key={rev.id} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '24px' }}>
+              {reviews.length > 0 ? reviews.map(rev => (
+                <div key={rev._id} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--text)', color: 'var(--bg)', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: '800' }}>
-                        {rev.user.charAt(0)}
+                        {rev.userName.charAt(0)}
                       </div>
                       <div>
-                        <p style={{ fontWeight: '700' }}>{rev.user}</p>
-                        <div style={{ display: 'flex', gap: '2px', marginTop: '4px' }}>
-                          {Array(5).fill().map((_, index) => (
-                            <Star key={index} fill={index < rev.rating ? "var(--text)" : "transparent"} color="var(--text)" size={12} />
+                        <p style={{ fontWeight: '700' }}>{rev.userName}</p>
+                        <div style={{ display: 'flex', gap: '2px' }}>
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} fill={i < rev.rating ? "var(--text)" : "transparent"} color="var(--text)" size={12} />
                           ))}
                         </div>
                       </div>
                     </div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{rev.date}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{new Date(rev.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p style={{ color: 'var(--text)', fontSize: '15px', lineHeight: '1.6', paddingLeft: '52px' }}>
-                    {rev.text}
-                  </p>
+                  <p style={{ color: 'var(--text)', fontSize: '15px', lineHeight: '1.6', paddingLeft: '52px' }}>{rev.comment}</p>
                 </div>
-              ))}
+              )) : (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>No reviews yet. Be the first!</p>
+              )}
             </div>
           </div>
         )}
@@ -407,6 +452,7 @@ export default function ProductDetail() {
           <ProductCard key={p._id} product={{ ...p, id: p._id }} />
         ))}
       </div>
+
       <StickyPurchaseBar
         product={product}
         show={showSticky}
@@ -428,8 +474,7 @@ export default function ProductDetail() {
         }}
       />
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style dangerouslySetInnerHTML={{ __html: `
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
       `}} />

@@ -17,7 +17,7 @@ exports.getProducts = async (req, res, next) => {
 // @access  Public
 exports.getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate('relatedParts');
     if (!product) {
       res.status(404);
       throw new Error('Product not found');

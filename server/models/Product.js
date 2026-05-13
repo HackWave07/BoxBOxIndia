@@ -26,7 +26,8 @@ const productSchema = new mongoose.Schema({
     loadIndex: { type: String },
     sku: { type: String },
     stock: { type: Boolean, default: true }
-  }]
+  }],
+  relatedParts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
