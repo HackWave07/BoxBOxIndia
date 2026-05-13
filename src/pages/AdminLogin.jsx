@@ -3,6 +3,7 @@ import { Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getSafeApiUrl } from '../utils/media';
 
 export default function AdminLogin() {
   const { setAuthToken } = useAuth();
@@ -28,7 +29,7 @@ export default function AdminLogin() {
   }, [location, navigate, setAuthToken, addToast]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google/admin`;
+    window.location.href = `${getSafeApiUrl()}/auth/google/admin`;
   };
 
   return (

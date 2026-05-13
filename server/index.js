@@ -100,11 +100,13 @@ const cspDirectives = isDev
       connectSrc: [
         "'self'",
         'https://boxboxindia.com',
-        'https://api.boxboxindia.com',
+        'https://boxboxindia.onrender.com',
         'https://accounts.google.com',
         'https://oauth2.googleapis.com',
         'https://checkout.razorpay.com',
         'https://api.razorpay.com',
+        'https://*.onrender.com',
+        'https://*.vercel.app',
       ],
       frameSrc: [
         "'self'",

@@ -7,6 +7,9 @@ import SkeletonCard from '../components/SkeletonCard';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheck, Truck, Wrench, Gauge, Mountain, Navigation, Map, Zap, Crosshair, MapPin, Clock, Tent, Shield, Car, Gem, Battery, Star } from 'lucide-react';
 import axios from 'axios';
+import { getSafeApiUrl } from '../utils/media';
+
+const API_URL = getSafeApiUrl();
 
 import perfTrack from '../assets/performance-track.png';
 import perfAT from '../assets/performance-at.png';
@@ -351,7 +354,7 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
+        const { data } = await axios.get(`${API_URL}/products`);
         
         let productsArray = [];
         if (Array.isArray(data)) {

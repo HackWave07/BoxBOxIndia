@@ -1,5 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { getSafeApiUrl } from '../utils/media';
+
+const API_URL = getSafeApiUrl();
 
 const AuthContext = createContext();
 
@@ -18,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/auth/profile`, {
+        const { data } = await axios.get(`${API_URL}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(data);
@@ -36,7 +39,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
+    const { data } = await axios.post(`${API_URL}/auth/login`, { email, password });
     localStorage.setItem('token', data.token);
     setToken(data.token);
     setUser(data);
@@ -44,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, { name, email, password });
+    const { data } = await axios.post(`${API_URL}/auth/register`, { name, email, password });
     localStorage.setItem('token', data.token);
     setToken(data.token);
     setUser(data);
@@ -59,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async (profileData) => {
-    const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/auth/profile`, profileData, {
+    const { data } = await axios.put(`${API_URL}/auth/profile`, profileData, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (data.token) {
@@ -71,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateAddresses = async (addresses) => {
-    const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/auth/addresses`, { addresses }, {
+    const { data } = await axios.put(`${API_URL}/auth/addresses`, { addresses }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const updatedUser = { ...user, addresses: data };

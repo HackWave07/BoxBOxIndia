@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { getSafeApiUrl } from '../utils/media';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function Login() {
   }, [location, navigate, setAuthToken, addToast, redirectPath]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    window.location.href = `${getSafeApiUrl()}/auth/google`;
   };
 
   const handleSubmit = async (e) => {

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { getSafeApiUrl } from '../utils/media';
+
+const API_URL = getSafeApiUrl();
 import { SearchX, Car, Filter, X } from 'lucide-react';
 
 // Components
@@ -41,7 +44,7 @@ export default function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL || ''}/products`);
+        const { data } = await axios.get(`${API_URL}/products`);
         const productsArray = Array.isArray(data) ? data : (data?.data || []);
         setProducts(productsArray?.map(p => ({ ...p, id: p._id || p.id })) || []);
       } catch (error) {
