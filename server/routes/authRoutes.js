@@ -39,7 +39,9 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
 
     // Admin Login Flow
     if (state === 'admin') {
-      if (req.user.email !== 'BoxBoxindia@gmail.com') {
+      const ADMIN_EMAILS = ['BoxBoxindia@gmail.com', 'imranmalik7461@gmail.com'];
+      
+      if (!ADMIN_EMAILS.includes(req.user.email)) {
         return res.redirect(`${frontendUrl}/admin-login?error=UnauthorizedAdmin`);
       }
       
