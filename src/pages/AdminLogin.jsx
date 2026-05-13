@@ -6,27 +6,25 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getSafeApiUrl } from '../utils/media';
 
 export default function AdminLogin() {
-  const { setAuthToken } = useAuth();
+  const { user } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    const error = params.get('error');
-
-    if (token) {
-      setAuthToken(token);
+    if (user && user.role === 'owner') {
       addToast('Admin access granted', 'success');
       navigate('/admin');
     }
+
+    const params = new URLSearchParams(location.search);
+    const error = params.get('error');
 
     if (error === 'UnauthorizedAdmin') {
       addToast('Unauthorized access. Owner account required.', 'error');
       navigate('/admin-login', { replace: true });
     }
-  }, [location, navigate, setAuthToken, addToast]);
+  }, [user, location, navigate, addToast]);
 
   const handleGoogleLogin = () => {
     window.location.href = `${getSafeApiUrl()}/auth/google/admin`;

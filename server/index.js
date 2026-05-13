@@ -29,8 +29,25 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
 });
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
+const allowedOrigins = isDev 
+  ? [FRONTEND_ORIGIN, 'http://localhost:5173', 'http://localhost:5000'] 
+  : [FRONTEND_ORIGIN, 'https://boxboxindia.com', 'https://www.boxboxindia.com'];
+
 app.use(cors({
-  origin: isDev ? [FRONTEND_ORIGIN, 'http://localhost:5173', 'http://localhost:5000'] : [FRONTEND_ORIGIN],
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const isVercel = origin.endsWith('.vercel.app');
+    const isAllowed = allowedOrigins.indexOf(origin) !== -1 || isVercel;
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

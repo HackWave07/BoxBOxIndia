@@ -15,14 +15,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const loadUser = async () => {
-      if (!token) {
+      // 1. Check if there's a token in the URL (from Google redirect)
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = params.get('token');
+      
+      let activeToken = urlToken || token;
+
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        setToken(urlToken);
+        // Clean up URL without refreshing
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      if (!activeToken) {
         setLoading(false);
         return;
       }
 
       try {
         const { data } = await axios.get(`${API_URL}/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${activeToken}` }
         });
         setUser(data);
       } catch (error) {

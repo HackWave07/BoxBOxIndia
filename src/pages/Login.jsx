@@ -9,7 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, setAuthToken } = useAuth();
+  const { login, user } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,14 +17,10 @@ export default function Login() {
   const redirectPath = location.state?.from || '/';
 
   React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    if (token) {
-      setAuthToken(token);
-      addToast('Successfully logged in with Google', 'success');
-      navigate(redirectPath);
+    if (user) {
+      navigate(user.role === 'owner' ? '/admin' : redirectPath);
     }
-  }, [location, navigate, setAuthToken, addToast, redirectPath]);
+  }, [user, navigate, redirectPath]);
 
   const handleGoogleLogin = () => {
     window.location.href = `${getSafeApiUrl()}/auth/google`;
