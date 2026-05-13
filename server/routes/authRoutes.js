@@ -25,9 +25,9 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/admin', passport.authenticate('google', { scope: ['profile', 'email'], state: 'admin' }));
 
 const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
-const frontendUrl = isDev 
+const frontendUrl = (isDev 
   ? 'http://localhost:5173' 
-  : (process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://boxboxindia.com');
+  : (process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://boxboxindia.com')).replace(/\/$/, '');
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: `${frontendUrl}/login?error=OAuthFailed` }), async (req, res, next) => {
   try {
