@@ -240,9 +240,23 @@ const mockProducts = [
 
 const importData = async () => {
   try {
-    await Product.deleteMany();
-    await Product.insertMany(mockProducts);
-    console.log(`✓ ${mockProducts.length} Products successfully seeded into MongoDB!`);
+    for (const product of mockProducts) {
+      // Find existing product by name and brand to avoid duplicates
+      const existingProduct = await Product.findOne({ name: product.name, brand: product.brand });
+      
+      if (!existingProduct) {
+        // Only insert if it doesn't exist
+        await Product.create(product);
+        console.log(`+ Added: ${product.name}`);
+      } else {
+        // If it exists, only update price/stock/specs but PRESERVE images and description if they might have been edited in admin
+        // Actually, the user says seeded products overwrite admin-edited ones. 
+        // So we only update fields that are unlikely to be the "content" edited by admin, or just skip entirely if it exists.
+        // Let's skip update if it exists to satisfy "seeded products do not overwrite admin-edited images".
+        console.log(`~ Skipped (exists): ${product.name}`);
+      }
+    }
+    console.log(`✓ Seeding complete!`);
     process.exit();
   } catch (error) {
     console.error(`Error: ${error}`);

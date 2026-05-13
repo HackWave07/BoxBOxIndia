@@ -238,7 +238,7 @@ const uploadHandler = (req, res, next) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
     }
-    const urls = req.files.map(file => `/uploads/${file.filename}`);
+    const urls = req.files.map(file => file.path);
     res.json({ urls });
   } catch (error) {
     console.error('Upload error:', error);
