@@ -20,8 +20,8 @@ const session = require('express-session');
 require('./config/passport')(passport);
 
 // ─── Environment flags ────────────────────────────────────────────────────────
-const isDev = process.env.NODE_ENV !== 'production';
-const FRONTEND_ORIGIN = isDev ? 'http://localhost:5173' : (process.env.FRONTEND_URL || 'https://boxboxindia.com');
+const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+const FRONTEND_ORIGIN = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://boxboxindia.com';
 
 // ─── Silence Chrome DevTools probe BEFORE helmet/CSP so it is never blocked ──
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
@@ -30,7 +30,7 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: [FRONTEND_ORIGIN, 'http://localhost:5000'],
+  origin: isDev ? [FRONTEND_ORIGIN, 'http://localhost:5173', 'http://localhost:5000'] : [FRONTEND_ORIGIN],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

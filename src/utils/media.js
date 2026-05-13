@@ -1,12 +1,16 @@
 export const getSafeApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
   
-  if (isProduction && (!envUrl || envUrl.includes('localhost'))) {
-    return 'https://boxboxindia.onrender.com/api';
+  // Force production backend if we are not on localhost
+  if (!isLocal) {
+    if (!envUrl || envUrl.includes('localhost')) {
+      return 'https://boxboxindia.onrender.com/api';
+    }
   }
   
-  return envUrl || '';
+  return envUrl || 'http://localhost:5000/api';
 };
 
 const apiUrl = getSafeApiUrl();

@@ -24,14 +24,15 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 // Google OAuth for Admin (Owner)
 router.get('/google/admin', passport.authenticate('google', { scope: ['profile', 'email'], state: 'admin' }));
 
-const frontendUrl = process.env.NODE_ENV === 'production' 
-  ? (process.env.FRONTEND_URL || 'https://boxboxindia.com') 
-  : 'http://localhost:5173';
+const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+const frontendUrl = isDev 
+  ? 'http://localhost:5173' 
+  : (process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://boxboxindia.com');
 
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: `${frontendUrl}/login?error=OAuthFailed` }), async (req, res, next) => {
   try {
     if (!req.user) {
-      return res.redirect('/login?error=OAuthFailed');
+      return res.redirect(`${frontendUrl}/login?error=OAuthFailed`);
     }
 
     const state = req.query.state;
