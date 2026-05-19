@@ -32,12 +32,12 @@ export default function TyreFinder() {
   };
 
   return (
-    <div className="glass-panel animate-lift" style={{ padding: '24px', maxWidth: '900px', width: '100%', margin: '0 auto', marginTop: '40px', textAlign: 'left' }}>
+    <div className="glass-panel animate-lift tyre-finder-container">
       <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
         <Search size={20} /> Find Your Perfect Tyres
       </h3>
       <form onSubmit={handleSearch}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+        <div className="tyre-finder-grid">
           <select name="vehicleType" style={inputStyle} value={form.vehicleType} onChange={handleChange}>
             <option value="">Vehicle Type</option>
             <option value="Car">Car</option>

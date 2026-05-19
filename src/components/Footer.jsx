@@ -6,10 +6,10 @@ export default function Footer() {
   return (
     <footer style={{ padding: '80px 0 40px 0', background: 'var(--bg2)', borderTop: '1px solid var(--border)' }}>
       <div className="section-full">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px' }}>
+        <div className="footer-grid">
         
         {/* COL 1 - BRAND + SOCIAL */}
-        <div style={{ flex: '1.5' }}>
+        <div className="footer-brand-col">
           <img src={logo} alt="BOXBOX" style={{ height: '45px', width: 'auto', marginBottom: '20px', display: 'block', objectFit: 'contain' }} />
           <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '24px', fontSize: '15px' }}>
             India’s trusted destination for premium motorcycle and car tyres. Genuine products from authorised dealers, delivered pan-India.
@@ -23,8 +23,8 @@ export default function Footer() {
 
         {/* COL 2 - MOTORCYCLE */}
         <div>
-          <h4 className="font-condensed" style={{ marginBottom: '20px', fontWeight: '800', letterSpacing: '1px', fontSize: '18px' }}>MOTORCYCLE</h4>
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h4 className="font-condensed footer-col-title">MOTORCYCLE</h4>
+          <ul className="footer-link-list">
             {['ADV & Dual Sport', 'Cruisers', 'Motocross', 'Sport Touring', 'Super Sports', 'Vintage'].map(link => (
               <li key={link}><Link to={`/products?category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
             ))}
@@ -33,8 +33,8 @@ export default function Footer() {
 
         {/* COL 3 - CAR TYRES */}
         <div>
-          <h4 className="font-condensed" style={{ marginBottom: '20px', fontWeight: '800', letterSpacing: '1px', fontSize: '18px' }}>CAR TYRES</h4>
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <h4 className="font-condensed footer-col-title">CAR TYRES</h4>
+          <ul className="footer-link-list">
             {['All Terrain', 'ATV', 'Mud Terrain', 'Sedan', 'Sports', 'SUV 4x4'].map(link => (
               <li key={link}><Link to={`/products?category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
             ))}
@@ -42,9 +42,9 @@ export default function Footer() {
         </div>
 
         {/* COL 4 - HELP */}
-        <div>
-          <h4 className="font-condensed" style={{ marginBottom: '20px', fontWeight: '800', letterSpacing: '1px', fontSize: '18px' }}>HELP</h4>
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+        <div className="footer-help-col">
+          <h4 className="font-condensed footer-col-title">HELP</h4>
+          <ul className="footer-link-list" style={{ marginBottom: '24px' }}>
             {['Shipping Policy', 'Returns Policy', 'Terms & Conditions', 'Privacy Policy', 'Contact Us'].map(link => (
                <li key={link}><Link to="#" className="footer-link">{link}</Link></li>
             ))}

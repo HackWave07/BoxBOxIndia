@@ -140,9 +140,9 @@ export default function ProductDetail() {
       <div ref={heroRef} className="responsive-two-col" style={{ gap: '24px', marginBottom: '80px', alignItems: 'start' }}>
         
         {/* LEFT: IMAGE GALLERY */}
-        <div style={{ position: 'sticky', top: '120px' }}>
+        <div className="product-gallery-container">
           <div
-            className="glass-panel"
+            className="glass-panel product-detail-gallery-main"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setZoomPos(prev => ({ ...prev, show: true }))}
             onMouseLeave={() => setZoomPos(prev => ({ ...prev, show: false }))}
@@ -154,8 +154,6 @@ export default function ProductDetail() {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              minHeight: '320px',
-              height: 'min(500px, 65vw)',
               overflow: 'hidden',
               cursor: 'zoom-in'
             }}
@@ -191,11 +189,9 @@ export default function ProductDetail() {
             {gallery.map((img, i) => (
               <div
                 key={i}
-                className="glass-panel"
+                className="glass-panel product-detail-thumbnail-item"
                 onClick={() => setActiveImage(img)}
                 style={{
-                  flex: '0 0 100px',
-                  height: '100px',
                   cursor: 'pointer',
                   border: activeImage === img ? '2px solid var(--text)' : '1px solid var(--border)',
                   overflow: 'hidden',
@@ -216,8 +212,8 @@ export default function ProductDetail() {
 
         {/* RIGHT: DETAILS */}
         <div>
-          <h1 style={{ fontSize: '42px', fontWeight: '900', marginBottom: '16px', letterSpacing: '-1px', lineHeight: '1.1' }}>{product.name}</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700', marginBottom: '24px' }}>{product.brand}</p>
+          <h1 className="product-details-title">{product.name}</h1>
+          <p className="product-details-brand">{product.brand}</p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -229,9 +225,9 @@ export default function ProductDetail() {
             <span style={{ color: 'var(--text-muted)' }}>({product?.reviews || 0} verified reviews)</span>
           </div>
 
-          <p style={{ fontSize: '36px', fontWeight: '800', marginBottom: '32px' }}>₹{product?.price?.toLocaleString() || '0'}</p>
+          <p className="product-details-price">₹{product?.price?.toLocaleString() || '0'}</p>
 
-          <div style={{ padding: '24px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '12px', marginBottom: '32px' }}>
+          <div className="product-details-desc-box">
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '16px', marginBottom: '24px' }}>
               {product?.description}
             </p>

@@ -67,7 +67,7 @@ export default function HeroSlider() {
   const isRight = slide.position === 'right';
 
   return (
-    <div style={{ position: 'relative', width: '100%', minHeight: '420px', height: '80vh', maxHeight: '760px', overflow: 'hidden', background: '#0a0a0a' }}>
+    <div className="hero-slider-container" style={{ overflow: 'hidden' }}>
 
       {/* Background image layer */}
       <div
@@ -110,9 +110,8 @@ export default function HeroSlider() {
         }}
       >
         <h1
-          className="font-condensed"
+          className="font-condensed hero-slide-title"
           style={{
-            fontSize: 'clamp(40px, 7vw, 88px)',
             fontWeight: '900',
             textTransform: 'uppercase',
             color: '#fff',
@@ -125,8 +124,8 @@ export default function HeroSlider() {
           {slide.label}
         </h1>
         <p
+          className="hero-slide-subtitle"
           style={{
-            fontSize: 'clamp(14px, 1.8vw, 22px)',
             color: 'rgba(255,255,255,0.75)',
             fontWeight: '500',
             marginBottom: '32px',
@@ -137,12 +136,12 @@ export default function HeroSlider() {
         </p>
         <button
           onClick={() => navigate(slide.href)}
+          className="hero-slide-btn"
           style={{
             background: '#fff',
             color: '#000',
             border: 'none',
             padding: '14px 32px',
-            fontSize: '14px',
             fontWeight: '800',
             letterSpacing: '2px',
             textTransform: 'uppercase',

@@ -50,22 +50,22 @@ export default function Cart() {
         </div>
 
         {/* ORDER SUMMARY */}
-        <div className="glass-panel" style={{ flex: 1, padding: '32px', position: 'sticky', top: '100px' }}>
+        <div className="order-summary-panel glass-panel">
           <h3 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '24px' }}>Order Summary</h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', color: 'var(--text-muted)' }}>
-            <span>Subtotal</span>
-            <span>₹{totalPrice.toLocaleString()}</span>
+          <div className="order-summary-row">
+            <span className="order-summary-label">Subtotal</span>
+            <span className="order-summary-value">₹{totalPrice.toLocaleString()}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', color: 'var(--text-muted)' }}>
-            <span>Shipping</span>
-            <span>Free</span>
+          <div className="order-summary-row">
+            <span className="order-summary-label">Shipping</span>
+            <span className="order-summary-value" style={{ color: '#10b981', fontWeight: '700' }}>Free</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', color: 'var(--text-muted)' }}>
-            <span>Tax (18% GST)</span>
-            <span>₹{(totalPrice * 0.18).toLocaleString()}</span>
+          <div className="order-summary-row">
+            <span className="order-summary-label">Tax (18% GST)</span>
+            <span className="order-summary-value">₹{(totalPrice * 0.18).toLocaleString()}</span>
           </div>
-          <div style={{ borderTop: '1px solid var(--border)', margin: '24px 0' }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px', fontSize: '24px', fontWeight: '800' }}>
+          <div style={{ borderTop: '1px dashed var(--border)', margin: '24px 0' }}></div>
+          <div className="order-summary-total-row">
             <span>Total</span>
             <span>₹{(totalPrice * 1.18).toLocaleString()}</span>
           </div>

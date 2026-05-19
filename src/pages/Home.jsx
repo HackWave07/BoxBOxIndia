@@ -52,10 +52,8 @@ const CarTyreCard = ({ cat, delay }) => {
       to={cat.path}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="category-card-premium"
       style={{
-        position: 'relative',
-        aspectRatio: '4 / 5',
-        minHeight: '260px',
         borderRadius: '16px',
         overflow: 'hidden',
         cursor: 'pointer',
@@ -106,15 +104,8 @@ const CarTyreCard = ({ cat, delay }) => {
       }} />
 
       {/* Content Layer */}
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        padding: '20px',
-        width: '100%',
-        color: '#FFFFFF',
-      }}>
-        <h3 className="font-condensed" style={{
-          fontSize: '24px',
+      <div className="category-card-premium-content" style={{ color: '#FFFFFF' }}>
+        <h3 className="font-condensed category-card-premium-title" style={{
           fontWeight: '800',
           textTransform: 'uppercase',
           lineHeight: '1.1',
@@ -153,10 +144,8 @@ const MotoCard = ({ cat, delay }) => {
       to={cat.path} 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="category-card-premium"
       style={{
-        position: 'relative',
-        aspectRatio: '4 / 5',
-        minHeight: '260px',
         borderRadius: '16px',
         overflow: 'hidden',
         cursor: 'pointer',
@@ -211,15 +200,8 @@ const MotoCard = ({ cat, delay }) => {
       }} />
 
       {/* Content Layer */}
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        padding: '20px', // Reverted back from 30px for smaller cards
-        width: '100%',
-        color: '#FFFFFF',
-      }}>
-        <h3 className="font-condensed" style={{ 
-          fontSize: '24px', // Scaled down for smaller cards
+      <div className="category-card-premium-content" style={{ color: '#FFFFFF' }}>
+        <h3 className="font-condensed category-card-premium-title" style={{ 
           fontWeight: '800', 
           textTransform: 'uppercase', 
           lineHeight: '1.1',
@@ -258,10 +240,8 @@ const PerformanceCard = ({ cat, delay }) => {
       to={cat.path} 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="performance-card-premium"
       style={{
-        position: 'relative',
-        aspectRatio: '4 / 5',
-        minHeight: '260px',
         borderRadius: '16px',
         overflow: 'hidden',
         cursor: 'pointer',
@@ -312,15 +292,8 @@ const PerformanceCard = ({ cat, delay }) => {
       }} />
 
       {/* Content Layer */}
-      <div style={{
-        position: 'relative',
-        zIndex: 2,
-        padding: '24px',
-        width: '100%',
-        color: '#FFFFFF'
-      }}>
-        <h3 className="font-condensed" style={{ 
-          fontSize: '28px', 
+      <div className="performance-card-premium-content" style={{ color: '#FFFFFF' }}>
+        <h3 className="font-condensed performance-card-premium-title" style={{ 
           fontWeight: '900', 
           textTransform: 'uppercase', 
           lineHeight: '1',
@@ -388,7 +361,7 @@ export default function Home() {
       <HeroSlider />
 
       {/* 2. TYRE FINDER */}
-      <section style={{ padding: '60px 0', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', background: 'radial-gradient(ellipse at bottom, var(--bg2), transparent)', borderBottom: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', background: 'radial-gradient(ellipse at bottom, var(--bg2), transparent)', borderBottom: '1px solid var(--border)' }}>
         <div className="section-full" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <h2 className="font-condensed" style={{ fontSize: '28px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '24px' }}>Find Tyres For Your Vehicle</h2>
         <TyreFinder />
@@ -396,7 +369,7 @@ export default function Home() {
       </section>
 
       {/* 2. TRUST BADGES */}
-      <section style={{ padding: '40px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="section-full" style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Truck size={32} />
@@ -423,14 +396,14 @@ export default function Home() {
       </section>
 
       {/* 3. FEATURED PRODUCTS */}
-      <section style={{ padding: '80px 0' }}>
+      <section className="home-section">
         <div className="section-full">
         <div className="section-heading-row" style={{ marginBottom: '40px' }}>
           <div>
             <h2 style={{ fontSize: '32px', marginBottom: '8px' }}>Featured Collection</h2>
             <p style={{ color: 'var(--text-muted)' }}>The best in class performance tyres</p>
           </div>
-          <Link to="/products" className="btn-secondary" style={{ padding: '8px 16px', fontSize: '14px' }}>View All</Link>
+          <Link to="/products" className="btn-secondary">View All</Link>
         </div>
         
         <div className="responsive-grid" style={{ gap: '24px' }}>
@@ -448,15 +421,11 @@ export default function Home() {
       </section>
 
       {/* 4. SHOP BY CATEGORY (Explore by Performance) */}
-      <section style={{ padding: '80px 0', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
         <div className="section-full">
           <h2 className="font-condensed" style={{ fontSize: '40px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '48px', letterSpacing: '1px', textAlign: 'center' }}>Explore by Performance</h2>
           
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
-            gap: '24px' 
-          }}>
+          <div className="home-category-grid">
             {[
               { 
                 name: 'Track / Street', 
@@ -494,7 +463,7 @@ export default function Home() {
       </section>
 
       {/* 5. MOTORCYCLE TYRES & BRAND BAR */}
-      <section style={{ padding: '80px 0', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
         <div className="section-full">
           
           <div className="section-heading-row" style={{ marginBottom: '40px' }}>
@@ -502,7 +471,7 @@ export default function Home() {
             <Link to="/products" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL &rarr;</Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '80px' }}>
+          <div className="home-category-grid">
             {[
               { name: 'ADV & Dual Sport', image: motoAdvNew, path: '/products?category=adv' },
               { name: 'Cruisers', image: motoCruiserNew, path: '/products?category=cruiser' },
@@ -515,9 +484,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '40px' }}>
-            <p style={{ fontSize: '12px', fontWeight: '600', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+          <div className="home-brands-container">
+            <p className="home-brands-title">Authorised Dealer — Premium Brands</p>
+            <div className="home-brands-list">
               {['Michelin', 'Pirelli', 'Metzeler', 'Dunlop', 'Shinko', 'BFGoodrich', 'Vredestein', 'Roadcruza', 'Radar', 'Bridgestone', 'Goodyear', 'Continental', 'Yokohama', 'Apollo', 'CEAT', 'MRF', 'Brembo', 'Ohlins', 'Akrapovic', 'Motul', 'K&N', 'RK Chain', 'EBC Brakes'].map(brand => (
                 <Link 
                   key={brand} 
@@ -554,7 +523,7 @@ export default function Home() {
       </section>
 
       {/* 6. CAR TYRES & BRAND BAR */}
-      <section style={{ padding: '80px 0', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
         <div className="section-full">
           
           <div className="section-heading-row" style={{ marginBottom: '40px' }}>
@@ -562,7 +531,7 @@ export default function Home() {
             <Link to="/products" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL &rarr;</Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '80px' }}>
+          <div className="home-category-grid">
             {[
               { name: 'Hatchback / Small Cars', image: carHatchback, path: '/products?category=hatchback', objectFit: 'contain', baseScale: 0.8, objectPosition: 'center 60%' },
               { name: 'Sedan / Premium', image: carSedan, path: '/products?category=sedan', objectFit: 'contain', baseScale: 1.0 },
@@ -575,9 +544,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '40px' }}>
-            <p style={{ fontSize: '12px', fontWeight: '600', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+          <div className="home-brands-container">
+            <p className="home-brands-title">Authorised Dealer — Premium Brands</p>
+            <div className="home-brands-list">
               {['Michelin', 'Bridgestone', 'Goodyear', 'Continental', 'Pirelli', 'Yokohama', 'Apollo', 'CEAT', 'MRF'].map(brand => (
                 <Link 
                   key={brand} 
@@ -614,7 +583,7 @@ export default function Home() {
       </section>
 
       {/* 7. WHAT RIDERS SAY (TESTIMONIALS) */}
-      <section style={{ padding: '80px 0', background: 'var(--bg-gradient)' }}>
+      <section className="home-section" style={{ background: 'var(--bg-gradient)' }}>
         <div className="section-full">
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', flexWrap: 'wrap', gap: '20px' }}>
@@ -664,7 +633,7 @@ export default function Home() {
       </section>
 
       {/* 8. PERFORMANCE PARTS (Vertical Expansion) */}
-      <section style={{ padding: '80px 0', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+      <section className="home-section" style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
         <div className="section-full">
           
           <div className="section-heading-row" style={{ marginBottom: '40px' }}>
@@ -672,7 +641,7 @@ export default function Home() {
             <Link to="/products?type=part" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>EXPLORE CATALOG &rarr;</Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '80px' }}>
+          <div className="home-category-grid">
             {[
               { name: 'Brakes', image: partBrakes, path: '/products?category=brakes', bgSize: '80%', bgPos: 'center 40%' },
               { name: 'Suspension', image: partSuspension, path: '/products?category=suspension', bgSize: '65%', bgPos: 'center 30%' },
@@ -685,9 +654,9 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', borderTop: '1px solid var(--border)', paddingTop: '40px' }}>
-            <p style={{ fontSize: '12px', fontWeight: '600', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Premium Parts Manufacturers</p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
+          <div className="home-brands-container">
+            <p className="home-brands-title">Premium Parts Manufacturers</p>
+            <div className="home-brands-list">
               {['Brembo', 'Ohlins', 'Akrapovic', 'Motul', 'K&N', 'RK Chain', 'EBC Brakes'].map(brand => (
                 <Link 
                   key={brand} 

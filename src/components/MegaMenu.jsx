@@ -137,6 +137,7 @@ function MenuColumn({ col }) {
 function MegaDropdown({ menu, visible }) {
   return (
     <div
+      className="mega-dropdown-container"
       style={{
         position: 'absolute',
         top: '100%',
@@ -146,10 +147,6 @@ function MegaDropdown({ menu, visible }) {
         background: 'var(--bg)',
         borderBottom: '1px solid var(--border)',
         boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
-        padding: '24px 60px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '40px',
         zIndex: 998,
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'all' : 'none',
@@ -168,6 +165,7 @@ function MegaDropdown({ menu, visible }) {
 function GuidesDropdown({ visible, left }) {
   return (
     <div
+      className="guides-dropdown-container"
       style={{
         position: 'absolute',
         top: '100%',
@@ -281,6 +279,60 @@ export default function MegaMenu() {
               Shop All →
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* ── Mobile menu bar ─────────────────────────── */}
+      <div
+        className="mobile-only"
+        style={{
+          background: 'var(--bg)',
+          borderBottom: '1px solid var(--border)',
+          padding: '8px 16px',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
+          {NAV_LABELS.map((label) => (
+            <button
+              key={label}
+              onClick={() => {
+                if (activeMenu === label) {
+                  setActiveMenu(null);
+                } else {
+                  open(label);
+                }
+              }}
+              style={{
+                background: activeMenu === label ? 'var(--bg2)' : 'none',
+                border: '1px solid var(--border)',
+                borderRadius: '20px',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: '700',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                color: activeMenu === label ? 'var(--text)' : 'var(--text-muted)',
+                transition: 'all 0.2s',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+          <Link
+            to="/products"
+            style={{
+              marginLeft: 'auto',
+              fontSize: '11px',
+              fontWeight: '800',
+              letterSpacing: '1px',
+              color: 'var(--text)',
+              textTransform: 'uppercase',
+              textDecoration: 'none'
+            }}
+          >
+            Shop All →
+          </Link>
         </div>
       </div>
 
