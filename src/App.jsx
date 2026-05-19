@@ -24,6 +24,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
+import SEOLanding from './pages/SEOLanding';
 
 function App() {
   return (
@@ -52,6 +53,10 @@ function App() {
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/track-order" element={<TrackOrder />} />
+            <Route path="/motorcycle-tyres" element={<SEOLanding type="motorcycle-tyres" />} />
+            <Route path="/bike-tyres" element={<SEOLanding type="bike-tyres" />} />
+            <Route path="/superbike-tyres" element={<SEOLanding type="superbike-tyres" />} />
+            <Route path="/premium-tyres" element={<SEOLanding type="premium-tyres" />} />
           </Routes>
         </main>
         <Footer />

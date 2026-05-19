@@ -9,6 +9,7 @@ import StickyPurchaseBar from '../components/StickyPurchaseBar';
 import axios from 'axios';
 import TyreSizeDrawer from '../components/TyreSizeDrawer';
 import { resolveMediaUrl } from '../utils/media';
+import { updateSEO } from '../utils/seo';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -79,6 +80,68 @@ export default function ProductDetail() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (product) {
+      const origin = window.location.origin;
+      updateSEO({
+        title: `${product.brand} ${product.name} Tyre | Buy Online in India | BoxBox India`,
+        description: `Buy ${product.brand} ${product.name} high performance tyre online at BoxBox India. Size: ${product.tyreSize || 'All Sizes'} | Category: ${product.category || 'Premium'}. Secure payments & fast delivery in India.`,
+        canonical: `${origin}/product/${id}`,
+        schema: {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Product",
+              "@id": `${origin}/product/${id}#product`,
+              "name": `${product.brand} ${product.name}`,
+              "image": resolveMediaUrl(product.image || ''),
+              "description": product.description || `Buy ${product.brand} ${product.name} premium tyre online in India at BoxBox India.`,
+              "brand": {
+                "@type": "Brand",
+                "name": product.brand
+              },
+              "offers": {
+                "@type": "Offer",
+                "priceCurrency": "INR",
+                "price": product.price,
+                "availability": "https://schema.org/InStock",
+                "url": `${origin}/product/${id}`
+              },
+              "aggregateRating": product.reviews > 0 ? {
+                "@type": "AggregateRating",
+                "ratingValue": product.rating || "5.0",
+                "reviewCount": product.reviews || "1"
+              } : undefined
+            },
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": origin
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Products",
+                  "item": `${origin}/products`
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": product.name,
+                  "item": `${origin}/product/${id}`
+                }
+              ]
+            }
+          ]
+        }
+      });
+    }
+  }, [product, id]);
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();

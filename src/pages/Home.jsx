@@ -10,6 +10,7 @@ import axios from 'axios';
 import { getSafeApiUrl } from '../utils/media';
 
 const API_URL = getSafeApiUrl();
+import { updateSEO } from '../utils/seo';
 
 import perfTrack from '../assets/performance-track.png';
 import perfAT from '../assets/performance-at.png';
@@ -353,6 +354,49 @@ export default function Home() {
       }
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const origin = window.location.origin;
+    updateSEO({
+      title: "Buy Premium Motorcycle Tyres Online in India | BoxBox India",
+      description: "Shop the best premium motorcycle tyres online in India. Explore top superbike tyres, tubeless bike tyres, and high-grip motorcycle tyres from Pirelli, Metzeler, and Michelin at BoxBox India.",
+      canonical: origin,
+      schema: {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": `${origin}/#organization`,
+            "name": "BoxBox India",
+            "url": origin,
+            "logo": {
+              "@type": "ImageObject",
+              "url": `${origin}/favicon.png`
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-9999999999",
+              "contactType": "customer service"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": `${origin}/#website`,
+            "url": origin,
+            "name": "BoxBox India",
+            "publisher": {
+              "@id": `${origin}/#organization`
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": `${origin}/products?search={search_term_string}`,
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    });
   }, []);
 
   return (

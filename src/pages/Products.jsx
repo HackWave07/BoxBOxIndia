@@ -20,7 +20,7 @@ import { useVehicle } from '../context/VehicleContext';
 // Utils
 import { matchFilter, normalize } from '../utils/filterUtils';
 
-export default function Products() {
+export default function Products({ preFilterCategory }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -59,7 +59,7 @@ export default function Products() {
   // 2. Sync URL params & Global Search
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const cat = params.get('category');
+    const cat = params.get('category') || preFilterCategory;
     const t = params.get('type');
     const b = params.get('brand');
     const s = params.get('search');
@@ -73,7 +73,7 @@ export default function Products() {
       sizes: sz ? [sz] : prev.sizes,
       search: s || prev.search
     }));
-  }, [location.search]);
+  }, [location.search, preFilterCategory]);
 
   // 3. Derived Options
   const availableOptions = useMemo(() => {
