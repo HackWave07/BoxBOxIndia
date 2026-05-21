@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
-import { Moon, Sun, ShoppingCart, Search, User, LogOut, Package, Layout } from 'lucide-react';
+import { Moon, Sun, ShoppingCart, Search, User, LogOut, Package, Layout, Truck } from 'lucide-react';
 import SearchBar from './SearchBar';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.jpg';
@@ -61,6 +61,10 @@ export default function Navbar() {
               onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
             >
               Track Order
+            </Link>
+
+            <Link to="/track-order" className="mobile-track-order-link nav-icon-btn" aria-label="Track Order">
+              <Truck size={20} />
             </Link>
 
             <button onClick={toggleTheme} style={{ background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', borderRadius: '50%', transition: 'background 0.3s' }} className="nav-icon-btn">
