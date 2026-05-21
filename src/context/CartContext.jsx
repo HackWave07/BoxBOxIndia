@@ -13,10 +13,14 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = (product) => {
+    const stockValue = Number(product.stock);
+    const availableStock = Number.isFinite(stockValue) ? stockValue : Infinity;
+    if (availableStock <= 0) return;
+
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.id === product.id ? { ...item, quantity: Math.min(item.quantity + 1, availableStock), stock: product.stock } : item);
       }
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -26,7 +30,9 @@ export const CartProvider = ({ children }) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQ = item.quantity + amount;
-        return { ...item, quantity: Math.max(1, newQ) };
+        const stockValue = Number(item.stock);
+        const availableStock = Number.isFinite(stockValue) ? Math.max(1, stockValue) : Infinity;
+        return { ...item, quantity: Math.min(Math.max(1, newQ), availableStock) };
       }
       return item;
     }));

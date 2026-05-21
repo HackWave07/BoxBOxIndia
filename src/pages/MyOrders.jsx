@@ -4,6 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import { Package, Clock, CheckCircle, Truck, ArrowRight, Loader2, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const getStatusLabel = (status) => {
+  const labels = {
+    paid: 'CONFIRMED',
+    confirmed: 'CONFIRMED',
+    out_for_delivery: 'OUT FOR DELIVERY'
+  };
+  return labels[status] || (status || 'pending').replace(/_/g, ' ').toUpperCase();
+};
+
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +37,11 @@ export default function MyOrders() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'paid': return <CheckCircle size={16} className="status-paid" />;
+      case 'paid':
+      case 'confirmed': return <CheckCircle size={16} className="status-confirmed" />;
+      case 'packed': return <Package size={16} className="status-packed" />;
       case 'shipped': return <Truck size={16} className="status-shipped" />;
+      case 'out_for_delivery': return <Truck size={16} className="status-out_for_delivery" />;
       case 'delivered': return <CheckCircle size={16} className="status-delivered" />;
       default: return <Clock size={16} className="status-pending" />;
     }
@@ -60,50 +72,56 @@ export default function MyOrders() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {orders.map((order) => (
-              <div key={order._id} className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
-                  <div>
-                    <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order ID</p>
-                    <h3 style={{ fontSize: '15px', fontWeight: '800' }}>#{order._id.slice(-8).toUpperCase()}</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                  </div>
-                  
-                  <div style={{ textAlign: 'right' }}>
-                    <div className={`tag status-${order.status}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {getStatusIcon(order.status)}
-                      {order.status.toUpperCase()}
-                    </div>
-                    <p style={{ fontSize: '20px', fontWeight: '900', marginTop: '12px' }}>₹{order.totalPrice?.toLocaleString()}</p>
-                  </div>
-                </div>
+            {orders.map((order) => {
+              const items = order.items || order.products || [];
+              const customer = order.customer || order.userDetails || {};
+              const total = order.total ?? order.totalPrice ?? 0;
 
-                <div style={{ background: 'var(--bg2)', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
-                  {order.products?.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: idx !== order.products.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '32px', height: '32px', background: 'var(--bg)', borderRadius: '4px', textAlign: 'center', lineHeight: '32px', fontSize: '11px', fontWeight: '800' }}>
-                          {item.quantity}x
-                        </div>
-                        <span style={{ fontSize: '14px', fontWeight: '600' }}>{item.name}</span>
+              return (
+                <div key={order._id} className="glass-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+                    <div>
+                      <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order ID</p>
+                      <h3 style={{ fontSize: '15px', fontWeight: '800' }}>#{order._id.slice(-8).toUpperCase()}</h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    
+                    <div style={{ textAlign: 'right' }}>
+                      <div className={`tag status-${order.status}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {getStatusIcon(order.status)}
+                        {getStatusLabel(order.status)}
                       </div>
-                      <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>₹{item.price?.toLocaleString()}</span>
+                      <p style={{ fontSize: '20px', fontWeight: '900', marginTop: '12px' }}>Rs. {total.toLocaleString()}</p>
                     </div>
-                  ))}
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <span className="tag" style={{ borderStyle: 'dashed' }}>
-                      <Info size={12} /> {order.userDetails?.phone}
-                    </span>
                   </div>
-                  <Link to={`/track-order?phone=${order.userDetails?.phone}`} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>
-                    Full Tracking <ArrowRight size={14} />
-                  </Link>
+
+                  <div style={{ background: 'var(--bg2)', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+                    {items.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: idx !== items.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '32px', height: '32px', background: 'var(--bg)', borderRadius: '4px', textAlign: 'center', lineHeight: '32px', fontSize: '11px', fontWeight: '800' }}>
+                            {item.quantity}x
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: '600' }}>{item.name}</span>
+                        </div>
+                        <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Rs. {item.price?.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <span className="tag" style={{ borderStyle: 'dashed' }}>
+                        <Info size={12} /> {customer.phone}
+                      </span>
+                    </div>
+                    <Link to={`/track-order?phone=${customer.phone || ''}`} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>
+                      Full Tracking <ArrowRight size={14} />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

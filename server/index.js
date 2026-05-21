@@ -257,7 +257,7 @@ app.use((_req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
   console.error(err.stack);
-  res.status(500).json({ success: false, error: err.message || 'Server Error' });
+  res.status(err.statusCode || 500).json({ success: false, error: err.message || 'Server Error' });
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────

@@ -55,9 +55,24 @@ export default function Checkout() {
     setSubmitting(true);
 
     try {
+      const latestProducts = await Promise.all(
+        cart.map(item => axios.get(`${import.meta.env.VITE_API_URL}/products/${item.id || item._id}`))
+      );
+      const stockIssue = latestProducts
+        .map(({ data }, index) => ({ product: data, cartItem: cart[index] }))
+        .find(({ product, cartItem }) => Number(product.stock) < Number(cartItem.quantity));
+
+      if (stockIssue) {
+        const available = Number(stockIssue.product.stock) || 0;
+        addToast(`${stockIssue.product.name} has only ${available} unit${available === 1 ? '' : 's'} available`, 'error');
+        setSubmitting(false);
+        return;
+      }
+
       // 1. Create Razorpay order
       const { data: order } = await axios.post(`${import.meta.env.VITE_API_URL}/payment/create-order`, {
-        amount: grandTotal
+        amount: grandTotal,
+        cartItems: cart
       });
 
       // 2. Initialize Razorpay options
@@ -89,7 +104,7 @@ export default function Checkout() {
             if (data.success) {
               alert("Payment Successful");
 
-              localStorage.removeItem("cart");
+              clearCart();
               window.location.href = "/";
             } else {
               alert("Payment verification failed: " + (data.message || "Unknown error"));

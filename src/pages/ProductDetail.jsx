@@ -186,6 +186,11 @@ export default function ProductDetail() {
   };
 
   const handleBuyNow = () => {
+    const stockValue = Number(product?.stock);
+    if (Number.isFinite(stockValue) && stockValue <= 0) {
+      addToast('This product is currently out of stock', 'error');
+      return;
+    }
     addToCart(product);
     navigate('/checkout');
   };

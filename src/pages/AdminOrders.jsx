@@ -4,6 +4,32 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { resolveMediaUrl } from '../utils/media';
 
+const ORDER_STATUSES = [
+  ['pending', 'Pending'],
+  ['confirmed', 'Confirmed'],
+  ['packed', 'Packed'],
+  ['shipped', 'Shipped'],
+  ['out_for_delivery', 'Out for Delivery'],
+  ['delivered', 'Delivered'],
+  ['cancelled', 'Cancelled'],
+  ['returned', 'Returned']
+];
+
+const SHIPPING_STATUSES = [
+  ['pending', 'Pending'],
+  ['ready', 'Ready'],
+  ['in_transit', 'In Transit'],
+  ['out_for_delivery', 'Out for Delivery'],
+  ['delivered', 'Delivered'],
+  ['returned', 'Returned'],
+  ['cancelled', 'Cancelled']
+];
+
+const getStatusLabel = (status) => {
+  if (status === 'paid') return 'Confirmed';
+  return ORDER_STATUSES.find(([value]) => value === status)?.[1] || status || 'Pending';
+};
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,21 +54,35 @@ export default function AdminOrders() {
     fetchOrders();
   }, [token]);
 
-  const updateStatus = async (id, status) => {
+  const updateOrder = async (id, payload) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}`, 
-        { status },
+      const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}`, 
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setOrders(prev =>
-        prev.map(o => (o._id === id ? { ...o, status } : o))
+        prev.map(o => (o._id === id ? data : o))
       );
     } catch (error) {
-      console.error("Failed to update status:", error);
-      alert("Failed to update status");
+      console.error("Failed to update order:", error);
+      alert(error.response?.data?.message || "Failed to update order");
     }
   };
+
+  const updateStatus = (id, status) => updateOrder(id, { status });
+
+  const updateShippingField = (order, field, value) => {
+    setOrders(prev => prev.map(o => (o._id === order._id ? { ...o, [field]: value } : o)));
+  };
+
+  const saveShipping = (order) => updateOrder(order._id, {
+    shippingStatus: order.shippingStatus,
+    courierName: order.courierName || '',
+    trackingId: order.trackingId || '',
+    dispatchDate: order.dispatchDate || '',
+    deliveryDate: order.deliveryDate || ''
+  });
 
   return (
     <div className="section-full" style={{ minHeight: '80vh', paddingTop: '60px', paddingBottom: '60px' }}>
@@ -82,10 +122,10 @@ export default function AdminOrders() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <label htmlFor={`status-${order._id}`} style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-muted)' }}>Status:</label>
-                  <span className={`tag status-${order.status}`} style={{ marginRight: '8px' }}>{order.status}</span>
+                  <span className={`tag status-${order.status}`} style={{ marginRight: '8px' }}>{getStatusLabel(order.status)}</span>
                   <select
                     id={`status-${order._id}`}
-                    value={order.status}
+                    value={order.status === 'paid' ? 'confirmed' : order.status}
                     onChange={(e) => updateStatus(order._id, e.target.value)}
                     style={{
                       background: 'var(--bg2)',
@@ -98,10 +138,9 @@ export default function AdminOrders() {
                       cursor: 'pointer'
                     }}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
+                    {ORDER_STATUSES.map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -119,6 +158,52 @@ export default function AdminOrders() {
                         <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--text-muted)' }}>{order.customer?.city} {order.customer?.postalCode ? `- ${order.customer.postalCode}` : ''}</p>
                     </div>
                  </div>
+              </div>
+
+              <div style={{ marginBottom: '20px', background: 'var(--bg2)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: '800', marginBottom: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '1px' }}>Shipping Details</h4>
+                <div className="responsive-two-col" style={{ gap: '12px' }}>
+                  <select
+                    value={order.shippingStatus || 'pending'}
+                    onChange={(e) => updateShippingField(order, 'shippingStatus', e.target.value)}
+                    style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', outline: 'none' }}
+                  >
+                    {SHIPPING_STATUSES.map(([value, label]) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                  <input
+                    value={order.courierName || ''}
+                    onChange={(e) => updateShippingField(order, 'courierName', e.target.value)}
+                    placeholder="Courier name"
+                    style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', outline: 'none' }}
+                  />
+                  <input
+                    value={order.trackingId || ''}
+                    onChange={(e) => updateShippingField(order, 'trackingId', e.target.value)}
+                    placeholder="Tracking ID"
+                    style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', outline: 'none' }}
+                  />
+                  <input
+                    type="date"
+                    value={order.dispatchDate ? order.dispatchDate.slice(0, 10) : ''}
+                    onChange={(e) => updateShippingField(order, 'dispatchDate', e.target.value)}
+                    style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', outline: 'none' }}
+                  />
+                  <input
+                    type="date"
+                    value={order.deliveryDate ? order.deliveryDate.slice(0, 10) : ''}
+                    onChange={(e) => updateShippingField(order, 'deliveryDate', e.target.value)}
+                    style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', padding: '12px', borderRadius: '8px', outline: 'none' }}
+                  />
+                  <button
+                    className="btn-secondary"
+                    onClick={() => saveShipping(order)}
+                    style={{ padding: '12px', fontSize: '13px', fontWeight: '800' }}
+                  >
+                    Save Shipping
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>

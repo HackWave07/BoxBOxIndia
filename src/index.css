@@ -583,8 +583,13 @@ button, .btn-primary, .btn-secondary {
 /* Status pill colors */
 .status-pending  { color: #f59e0b; border-color: #f59e0b; }
 .status-paid     { color: #10b981; border-color: #10b981; }
+.status-confirmed{ color: #10b981; border-color: #10b981; }
+.status-packed   { color: #6366f1; border-color: #6366f1; }
 .status-shipped  { color: #3b82f6; border-color: #3b82f6; }
+.status-out_for_delivery { color: #0ea5e9; border-color: #0ea5e9; }
 .status-delivered{ color: #8b5cf6; border-color: #8b5cf6; }
+.status-cancelled{ color: #ef4444; border-color: #ef4444; }
+.status-returned { color: #f97316; border-color: #f97316; }
 
 /* Skeleton shimmer */
 .skeleton {

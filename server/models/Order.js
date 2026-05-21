@@ -15,14 +15,26 @@ const orderSchema = new mongoose.Schema({
   paymentId: String,
   orderId: String,
   signature: String,
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed', 'refunded'],
+    default: 'pending'
+  },
   status: {
     type: String,
-    default: "paid"
+    enum: ['pending', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled', 'returned', 'paid'],
+    default: "pending"
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  shippingStatus: {
+    type: String,
+    enum: ['pending', 'ready', 'in_transit', 'out_for_delivery', 'delivered', 'returned', 'cancelled'],
+    default: 'pending'
+  },
+  courierName: { type: String, default: '' },
+  trackingId: { type: String, default: '' },
+  dispatchDate: Date,
+  deliveryDate: Date,
+  inventoryAdjusted: { type: Boolean, default: false }
+}, { timestamps: true });
 
 module.exports = mongoose.model("Order", orderSchema);

@@ -1,6 +1,7 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Order = require("../models/Order");
+const { reserveStock, validateStock } = require("../utils/inventory");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -9,7 +10,11 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { amount, cartItems } = req.body;
+
+    if (Array.isArray(cartItems) && cartItems.length > 0) {
+      await validateStock(cartItems);
+    }
 
     const options = {
       amount: Math.round(amount * 100), // in paise, using Math.round to avoid floating point issues
@@ -49,6 +54,13 @@ exports.verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid Signature" });
     }
 
+    const existingOrder = await Order.findOne({ paymentId: razorpay_payment_id });
+    if (existingOrder) {
+      return res.json({ success: true, order: existingOrder });
+    }
+
+    await reserveStock(cartItems);
+
     const order = new Order({
       user: user || null,
       items: cartItems,
@@ -56,14 +68,18 @@ exports.verifyPayment = async (req, res) => {
       customer,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
-      signature: razorpay_signature
+      signature: razorpay_signature,
+      paymentStatus: "paid",
+      status: "confirmed",
+      shippingStatus: "pending",
+      inventoryAdjusted: true
     });
 
     await order.save();
 
-    res.json({ success: true });
+    res.json({ success: true, order });
   } catch (error) {
     console.error("Payment Verification Error:", error);
-    res.status(500).json({ success: false });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
