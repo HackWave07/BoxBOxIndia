@@ -40,7 +40,7 @@ export default function SearchBar() {
       // Grouping logic (since backend might just return a flat array)
       const products = data.slice(0, 6);
       const brands = [...new Set(data.map(p => p.brand))].slice(0, 4);
-      const categories = [...new Set(data.map(p => p.type))].map(t => t === 'tyre' ? 'All Tyres' : 'Parts').slice(0, 3);
+      const categories = [...new Set(data.map(p => p.type))].map(t => t === 'tyre' ? 'All Tyres' : 'Performance Parts').slice(0, 3);
 
       setResults({ products, categories, brands });
     } catch (err) {

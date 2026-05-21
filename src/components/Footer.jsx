@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.jpg';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -15,9 +16,33 @@ export default function Footer() {
             India’s trusted destination for premium motorcycle and car tyres. Genuine products from authorised dealers, delivered pan-India.
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <a href="https://www.instagram.com/boxboxindia/?hl=en" target="_blank" rel="noopener noreferrer" className="btn-social">Instagram</a>
-            <a href="https://www.facebook.com/p/BOX-BOX-61556176625024/" target="_blank" rel="noopener noreferrer" className="btn-social">Facebook</a>
-            <a href="https://www.youtube.com/@BoxBoxindia/shorts?app=desktop" target="_blank" rel="noopener noreferrer" className="btn-social">YouTube</a>
+            <a 
+              href="https://www.instagram.com/boxboxindia/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn-social"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Instagram size={15} /> Instagram
+            </a>
+            <a 
+              href="https://www.facebook.com/boxboxindia" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn-social"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Facebook size={15} /> Facebook
+            </a>
+            <a 
+              href="https://www.youtube.com/@boxboxindia" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn-social"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Youtube size={15} /> YouTube
+            </a>
           </div>
         </div>
 
@@ -26,7 +51,7 @@ export default function Footer() {
           <h4 className="font-condensed footer-col-title">MOTORCYCLE</h4>
           <ul className="footer-link-list">
             {['ADV & Dual Sport', 'Cruisers', 'Motocross', 'Sport Touring', 'Super Sports', 'Vintage'].map(link => (
-              <li key={link}><Link to={`/products?category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
+              <li key={link}><Link to={`/products?type=tyre&vehicle=motorcycle&category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
             ))}
           </ul>
         </div>
@@ -36,7 +61,7 @@ export default function Footer() {
           <h4 className="font-condensed footer-col-title">CAR TYRES</h4>
           <ul className="footer-link-list">
             {['All Terrain', 'ATV', 'Mud Terrain', 'Sedan', 'Sports', 'SUV 4x4'].map(link => (
-              <li key={link}><Link to={`/products?category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
+              <li key={link}><Link to={`/products?type=tyre&vehicle=car&category=${encodeURIComponent(link)}`} className="footer-link">{link}</Link></li>
             ))}
           </ul>
         </div>
@@ -45,9 +70,27 @@ export default function Footer() {
         <div className="footer-help-col">
           <h4 className="font-condensed footer-col-title">HELP</h4>
           <ul className="footer-link-list" style={{ marginBottom: '24px' }}>
-            {['Shipping Policy', 'Returns Policy', 'Terms & Conditions', 'Privacy Policy', 'Contact Us'].map(link => (
-               <li key={link}><Link to="#" className="footer-link">{link}</Link></li>
-            ))}
+            {[
+              { label: 'Shipping Policy', to: '/shipping-policy' },
+              { label: 'Returns & Refund Policy', to: '/returns-policy' },
+              { label: 'Terms & Conditions', to: '/terms-and-conditions' },
+              { label: 'Privacy Policy', to: '/privacy-policy' },
+              { label: 'Contact Us', to: 'https://wa.me/919022229979?text=Hi%20BOXBOX%20India%2C%20I%20need%20help%20with%20tyres', external: true }
+            ].map(link => {
+              if (link.external) {
+                return (
+                  <li key={link.label}>
+                    <a href={link.to} target="_blank" rel="noopener noreferrer" className="footer-link" style={{ display: 'inline-flex' }}>
+                      {link.label}
+                    </a>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={link.label}><Link to={link.to} className="footer-link">{link.label}</Link></li>
+              );
+            })}
           </ul>
           <div>
             <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginBottom: '8px' }}>

@@ -5,11 +5,12 @@ import { useTheme } from '../context/ThemeContext';
 export default function ActiveFilters({ activeFilters, onRemove, onClearAll }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { types, categories, brands, sizes, priceRange, search } = activeFilters;
+  const { types, categories, brands, sizes, vehicleGroups = [], priceRange, search } = activeFilters;
 
   const hasFilters = 
     types.length > 0 || 
     categories.length > 0 || 
+    vehicleGroups.length > 0 ||
     brands.length > 0 || 
     sizes.length > 0 || 
     priceRange.min !== null || 
@@ -70,6 +71,15 @@ export default function ActiveFilters({ activeFilters, onRemove, onClearAll }) {
         <span key={c} style={tagStyle}>
           {c}
           <div style={closeBtnStyle} onClick={() => onRemove('categories', c)} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'} onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}>
+            <X size={12} />
+          </div>
+        </span>
+      ))}
+
+      {vehicleGroups.map(v => (
+        <span key={v} style={tagStyle}>
+          <span style={{ opacity: 0.6 }}>Vehicle:</span> {v}
+          <div style={closeBtnStyle} onClick={() => onRemove('vehicleGroups', v)} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 68, 68, 0.2)'} onMouseLeave={e => e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}>
             <X size={12} />
           </div>
         </span>

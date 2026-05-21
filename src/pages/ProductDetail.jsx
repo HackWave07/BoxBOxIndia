@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { Star, Shield, Info, ShoppingCart, Loader2, CheckCircle2, ChevronRight, ArrowRight, Package } from 'lucide-react';
+import { Star, Shield, Info, ShoppingCart, Loader2, CheckCircle2, ChevronRight, ArrowRight, Package, MessageSquare } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import StickyPurchaseBar from '../components/StickyPurchaseBar';
 import axios from 'axios';
@@ -84,6 +84,8 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       const origin = window.location.origin;
+      const stockValue = Number(product.stock);
+      const isOutOfStock = Number.isFinite(stockValue) ? stockValue <= 0 : false;
       updateSEO({
         title: `${product.brand} ${product.name} Tyre | Buy Online in India | BoxBox India`,
         description: `Buy ${product.brand} ${product.name} high performance tyre online at BoxBox India. Size: ${product.tyreSize || 'All Sizes'} | Category: ${product.category || 'Premium'}. Secure payments & fast delivery in India.`,
@@ -105,7 +107,7 @@ export default function ProductDetail() {
                 "@type": "Offer",
                 "priceCurrency": "INR",
                 "price": product.price,
-                "availability": "https://schema.org/InStock",
+                "availability": isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
                 "url": `${origin}/product/${id}`
               },
               "aggregateRating": product.reviews > 0 ? {
@@ -197,6 +199,11 @@ export default function ProductDetail() {
   }
 
   const gallery = (product?.images && product.images.length > 0 ? product.images : [product?.image || '']).map(resolveMediaUrl);
+  const stockValue = Number(product.stock);
+  const isOutOfStock = Number.isFinite(stockValue) ? stockValue <= 0 : false;
+  const lowStock = Number.isFinite(stockValue) && stockValue > 0 && stockValue <= 5;
+  const whatsappText = encodeURIComponent(`Hi BOXBOX India, I want to enquire about restock availability for ${product.brand} ${product.name}.`);
+  const whatsappLink = `https://wa.me/919022229979?text=${whatsappText}`;
 
   return (
     <div className="section-full" style={{ paddingTop: '40px', paddingBottom: showSticky ? '90px' : '60px', transition: 'padding-bottom 0.3s ease' }}>
@@ -289,6 +296,15 @@ export default function ProductDetail() {
           </div>
 
           <p className="product-details-price">₹{product?.price?.toLocaleString() || '0'}</p>
+          {isOutOfStock ? (
+            <p style={{ color: '#ff4444', fontWeight: '900', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '-20px', marginBottom: '28px' }}>
+              Out of Stock
+            </p>
+          ) : lowStock ? (
+            <p style={{ color: '#ff7b00', fontWeight: '800', fontSize: '14px', marginTop: '-20px', marginBottom: '28px' }}>
+              Only {product.stock} left
+            </p>
+          ) : null}
 
           <div className="product-details-desc-box">
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '16px', marginBottom: '24px' }}>
@@ -321,17 +337,30 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <button
-            className="btn-primary"
-            style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}
-            onClick={() => {
-              addToCart(product);
-              addToast(`${product.name} secured in cart`, 'success');
-            }}
-          >
-            <ShoppingCart size={20} />
-            Secure Add to Cart
-          </button>
+          {isOutOfStock ? (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+              style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
+            >
+              <MessageSquare size={20} />
+              Enquire on WhatsApp
+            </a>
+          ) : (
+            <button
+              className="btn-primary"
+              style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}
+              onClick={() => {
+                addToCart(product);
+                addToast(`${product.name} secured in cart`, 'success');
+              }}
+            >
+              <ShoppingCart size={20} />
+              Secure Add to Cart
+            </button>
+          )}
         </div>
       </div>
 
@@ -516,6 +545,7 @@ export default function ProductDetail() {
         product={product}
         show={showSticky}
         onAddToCart={() => {
+          if (isOutOfStock) return;
           addToCart(product);
           addToast(`${product.name} secured in cart`, 'success');
         }}

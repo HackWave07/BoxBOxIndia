@@ -11,6 +11,7 @@ import { getSafeApiUrl } from '../utils/media';
 
 const API_URL = getSafeApiUrl();
 import { updateSEO } from '../utils/seo';
+import { mockProducts } from '../data/mockProducts';
 
 import perfTrack from '../assets/performance-track.png';
 import perfAT from '../assets/performance-at.png';
@@ -322,10 +323,12 @@ const PerformanceCard = ({ cat, delay }) => {
 };
 
 export default function Home() {
-  const [featured, setFeatured] = useState([]);
+  const [featured, setFeatured] = useState(() => mockProducts.slice(0, 4));
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  const averageReviewRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviews.length).toFixed(1) : null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -340,16 +343,83 @@ export default function Home() {
           productsArray = data.data;
         }
         
-        setFeatured(productsArray.slice(0, 4));
+        if (productsArray.length === 0) {
+          setFeatured(mockProducts.slice(0, 4));
+        } else {
+          setFeatured(productsArray.slice(0, 4));
+        }
         setLoading(false);
 
+        // Find matching product IDs for default reviews
+        const metzelerProd = productsArray.find(p => p.brand === 'Metzeler' && p.name === 'Roadtec 01 SE');
+        const michelinProd = productsArray.find(p => p.brand === 'Michelin' && p.name === 'Pilot Sport 4S');
+        const pirelliProd = productsArray.find(p => p.brand === 'Pirelli' && p.name === 'Scorpion Rally STR');
+
+        const initialDefaultReviews = [
+          {
+            _id: 'default-rev-1',
+            rating: 5,
+            comment: "The Metzeler Roadtec 01 SE transformed my sports tourer. Outstanding wet grip and confidence in the corners. Highly recommend BoxBox India for their quick delivery!",
+            userName: "Aditya Sharma",
+            product: metzelerProd ? { ...metzelerProd, id: metzelerProd._id } : { _id: 'roadtec', id: 'roadtec', brand: "Metzeler", name: "Roadtec 01 SE" }
+          },
+          {
+            _id: 'default-rev-2',
+            rating: 5,
+            comment: "Unmatched service and 100% genuine tyres. Got my Michelin Pilot Sport 4S delivered to Bangalore in 2 days. The fitment support was excellent.",
+            userName: "Rohan Mehta",
+            product: michelinProd ? { ...michelinProd, id: michelinProd._id } : { _id: 'ps4s', id: 'ps4s', brand: "Michelin", name: "Pilot Sport 4S" }
+          },
+          {
+            _id: 'default-rev-3',
+            rating: 5,
+            comment: "Great experience buying Pirelli Scorpion Rally STR for my Himalayan. Very good dual-purpose performance. Will definitely buy again from BoxBox.",
+            userName: "Vikram Malhotra",
+            product: pirelliProd ? { ...pirelliProd, id: pirelliProd._id } : { _id: 'scorpion', id: 'scorpion', brand: "Pirelli", name: "Scorpion Rally STR" }
+          }
+        ];
+
         // Fetch featured reviews
-        const reviewsRes = await axios.get(`${API_URL}/reviews/featured`);
-        setReviews(reviewsRes.data);
+        try {
+          const reviewsRes = await axios.get(`${API_URL}/reviews/featured`);
+          if (Array.isArray(reviewsRes.data) && reviewsRes.data.length > 0) {
+            setReviews(reviewsRes.data);
+          } else {
+            setReviews(initialDefaultReviews);
+          }
+        } catch {
+          setReviews(initialDefaultReviews);
+        }
         setReviewsLoading(false);
       } catch (error) {
         console.error('Error fetching home data', error);
+        setFeatured(mockProducts.slice(0, 4));
         setLoading(false);
+
+        const initialDefaultReviews = [
+          {
+            _id: 'default-rev-1',
+            rating: 5,
+            comment: "The Metzeler Roadtec 01 SE transformed my sports tourer. Outstanding wet grip and confidence in the corners. Highly recommend BoxBox India for their quick delivery!",
+            userName: "Aditya Sharma",
+            product: { _id: 'roadtec', id: 'roadtec', brand: "Metzeler", name: "Roadtec 01 SE" }
+          },
+          {
+            _id: 'default-rev-2',
+            rating: 5,
+            comment: "Unmatched service and 100% genuine tyres. Got my Michelin Pilot Sport 4S delivered to Bangalore in 2 days. The fitment support was excellent.",
+            userName: "Rohan Mehta",
+            product: { _id: 'ps4s', id: 'ps4s', brand: "Michelin", name: "Pilot Sport 4S" }
+          },
+          {
+            _id: 'default-rev-3',
+            rating: 5,
+            comment: "Great experience buying Pirelli Scorpion Rally STR for my Himalayan. Very good dual-purpose performance. Will definitely buy again from BoxBox.",
+            userName: "Vikram Malhotra",
+            product: { _id: 'scorpion', id: 'scorpion', brand: "Pirelli", name: "Scorpion Rally STR" }
+          }
+        ];
+        setReviews(initialDefaultReviews);
         setReviewsLoading(false);
       }
     };
@@ -457,6 +527,10 @@ export default function Home() {
             featured.map(product => (
               <ProductCard key={product._id || product.id} product={{...product, id: product._id || product.id}} />
             ))
+          ) : Array.isArray(mockProducts) && mockProducts.length > 0 ? (
+            mockProducts.slice(0, 4).map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))
           ) : (
             <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1' }}>No products available</p>
           )}
@@ -474,28 +548,28 @@ export default function Home() {
               { 
                 name: 'Track / Street', 
                 image: perfTrack,
-                path: '/products?category=sport',
+                path: '/products?type=tyre&vehicle=motorcycle&category=sport',
                 bgSize: '85%',
                 bgPos: 'center 35%'
               },
               { 
                 name: 'All Terrain', 
                 image: perfAT,
-                path: '/products?category=off-road',
+                path: '/products?type=tyre&vehicle=motorcycle&category=off-road',
                 bgSize: '80%',
                 bgPos: 'center 35%'
               },
               { 
                 name: 'Cruiser', 
                 image: perfCruiser,
-                path: '/products?category=cruiser',
+                path: '/products?type=tyre&vehicle=motorcycle&category=cruiser',
                 bgSize: '85%',
                 bgPos: 'center 35%'
               },
               { 
                 name: 'Sport / Touring', 
                 image: perfTouring,
-                path: '/products?category=touring',
+                path: '/products?type=tyre&vehicle=motorcycle&category=touring',
                 bgSize: '85%',
                 bgPos: 'center 35%'
               }
@@ -512,50 +586,58 @@ export default function Home() {
           
           <div className="section-heading-row" style={{ marginBottom: '40px' }}>
             <h2 className="font-condensed" style={{ fontSize: '36px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>Motorcycle Tyres</h2>
-            <Link to="/products" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL &rarr;</Link>
+            <Link to="/products?type=tyre" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL →</Link>
           </div>
 
           <div className="home-category-grid">
             {[
-              { name: 'ADV & Dual Sport', image: motoAdvNew, path: '/products?category=adv' },
-              { name: 'Cruisers', image: motoCruiserNew, path: '/products?category=cruiser' },
-              { name: 'Motocross', image: motoMotocrossNew, path: '/products?category=motocross' },
-              { name: 'Sport Touring', image: motoSportTouringNew, path: '/products?category=touring', baseScale: 1.08 },
-              { name: 'Super Sports', image: motoSuperSportsNew, path: '/products?category=sport', baseScale: 1.08 },
-              { name: 'Vintage', image: motoVintageNew, path: '/products?category=vintage', baseScale: 1.08 }
+              { name: 'ADV & Dual Sport', image: motoAdvNew, path: '/products?type=tyre&vehicle=motorcycle&category=adv' },
+              { name: 'Cruisers', image: motoCruiserNew, path: '/products?type=tyre&vehicle=motorcycle&category=cruiser' },
+              { name: 'Motocross', image: motoMotocrossNew, path: '/products?type=tyre&vehicle=motorcycle&category=motocross' },
+              { name: 'Sport Touring', image: motoSportTouringNew, path: '/products?type=tyre&vehicle=motorcycle&category=touring', baseScale: 1.08 },
+              { name: 'Super Sports', image: motoSuperSportsNew, path: '/products?type=tyre&vehicle=motorcycle&category=sport', baseScale: 1.08 },
+              { name: 'Vintage', image: motoVintageNew, path: '/products?type=tyre&vehicle=motorcycle&category=vintage', baseScale: 1.08 }
             ].map((cat, index) => (
               <MotoCard key={cat.name} cat={cat} delay={index * 0.1} />
             ))}
           </div>
 
-          <div className="home-brands-container">
-            <p className="home-brands-title">Authorised Dealer — Premium Brands</p>
-            <div className="home-brands-list">
-              {['Michelin', 'Pirelli', 'Metzeler', 'Dunlop', 'Shinko', 'BFGoodrich', 'Vredestein', 'Roadcruza', 'Radar', 'Bridgestone', 'Goodyear', 'Continental', 'Yokohama', 'Apollo', 'CEAT', 'MRF', 'Brembo', 'Ohlins', 'Akrapovic', 'Motul', 'K&N', 'RK Chain', 'EBC Brakes'].map(brand => (
+          <div className="home-brands-container" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '40px' }}>
+            <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
+            <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
+              {['Michelin', 'Pirelli', 'Metzeler', 'Dunlop', 'Shinko', 'BFGoodrich', 'Vredestein', 'Roadcruza', 'Radar', 'Bridgestone', 'Goodyear', 'Continental', 'Yokohama', 'Apollo', 'CEAT', 'MRF'].map(brand => (
                 <Link 
                   key={brand} 
-                  to={`/products?brand=${brand}`}
-                  className="brand-logo" 
+                  to={`/products?type=tyre&brand=${brand}`}
+                  className="brand-chip"
                   style={{ 
-                    fontSize: '20px', 
-                    fontWeight: '800', 
+                    fontSize: '13px', 
+                    fontWeight: '700', 
                     textTransform: 'uppercase', 
-                    fontFamily: "'Barlow Condensed', sans-serif", 
                     letterSpacing: '1px',
                     textDecoration: 'none',
-                    color: 'inherit',
+                    color: 'var(--text)',
+                    background: 'var(--bg2)',
+                    border: '1px solid var(--border)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'inline-block'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '100px'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.opacity = '1';
-                    e.currentTarget.style.textShadow = '0 0 20px rgba(255,255,255,0.3)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = 'var(--text)';
+                    e.currentTarget.style.background = 'var(--text)';
+                    e.currentTarget.style.color = 'var(--bg)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.opacity = '0.7';
-                    e.currentTarget.style.textShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.background = 'var(--bg2)';
+                    e.currentTarget.style.color = 'var(--text)';
                   }}
                 >
                   {brand}
@@ -572,50 +654,58 @@ export default function Home() {
           
           <div className="section-heading-row" style={{ marginBottom: '40px' }}>
             <h2 className="font-condensed" style={{ fontSize: '36px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>Car Tyres</h2>
-            <Link to="/products" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL &rarr;</Link>
+            <Link to="/products?type=tyre" className="font-condensed brand-link" style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '1px' }}>VIEW ALL →</Link>
           </div>
 
           <div className="home-category-grid">
             {[
-              { name: 'Hatchback / Small Cars', image: carHatchback, path: '/products?category=hatchback', objectFit: 'contain', baseScale: 0.8, objectPosition: 'center 60%' },
-              { name: 'Sedan / Premium', image: carSedan, path: '/products?category=sedan', objectFit: 'contain', baseScale: 1.0 },
-              { name: 'SUV / MUV', image: carSuv, path: '/products?category=suv', objectFit: 'contain', baseScale: 1.0 },
-              { name: 'All-Terrain / Offroad', image: carOffroad, path: '/products?category=off-road', objectFit: 'contain', baseScale: 1.0 },
-              { name: 'Performance / Sports', image: carSports, path: '/products?category=sport', objectFit: 'contain', baseScale: 1.0 },
-              { name: 'EV / Electric', image: carEv, path: '/products?category=ev', objectFit: 'contain', baseScale: 1.0 }
+              { name: 'Hatchback / Small Cars', image: carHatchback, path: '/products?type=tyre&vehicle=car&category=hatchback', objectFit: 'contain', baseScale: 0.8, objectPosition: 'center 60%' },
+              { name: 'Sedan / Premium', image: carSedan, path: '/products?type=tyre&vehicle=car&category=sedan', objectFit: 'contain', baseScale: 1.0 },
+              { name: 'SUV / MUV', image: carSuv, path: '/products?type=tyre&vehicle=car&category=suv', objectFit: 'contain', baseScale: 1.0 },
+              { name: 'All-Terrain / Offroad', image: carOffroad, path: '/products?type=tyre&vehicle=car&category=off-road', objectFit: 'contain', baseScale: 1.0 },
+              { name: 'Performance / Sports', image: carSports, path: '/products?type=tyre&vehicle=car&category=sport', objectFit: 'contain', baseScale: 1.0 },
+              { name: 'EV / Electric', image: carEv, path: '/products?type=tyre&vehicle=car&category=ev', objectFit: 'contain', baseScale: 1.0 }
             ].map((cat, index) => (
               <CarTyreCard key={cat.name} cat={cat} delay={index * 0.1} />
             ))}
           </div>
 
-          <div className="home-brands-container">
-            <p className="home-brands-title">Authorised Dealer — Premium Brands</p>
-            <div className="home-brands-list">
+          <div className="home-brands-container" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '40px' }}>
+            <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
+            <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
               {['Michelin', 'Bridgestone', 'Goodyear', 'Continental', 'Pirelli', 'Yokohama', 'Apollo', 'CEAT', 'MRF'].map(brand => (
                 <Link 
                   key={brand} 
-                  to={`/products?brand=${brand}`}
+                  to={`/products?type=tyre&brand=${brand}`}
+                  className="brand-chip"
                   style={{ 
-                    fontSize: '20px', 
-                    fontWeight: '800', 
+                    fontSize: '13px', 
+                    fontWeight: '700', 
                     textTransform: 'uppercase', 
-                    fontFamily: "'Barlow Condensed', sans-serif", 
                     letterSpacing: '1px',
                     textDecoration: 'none',
-                    color: 'inherit',
+                    color: 'var(--text)',
+                    background: 'var(--bg2)',
+                    border: '1px solid var(--border)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'inline-block',
-                    opacity: 0.7
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '100px'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.opacity = '1';
-                    e.currentTarget.style.textShadow = '0 0 20px rgba(255,255,255,0.3)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = 'var(--text)';
+                    e.currentTarget.style.background = 'var(--text)';
+                    e.currentTarget.style.color = 'var(--bg)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.opacity = '0.7';
-                    e.currentTarget.style.textShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.background = 'var(--bg2)';
+                    e.currentTarget.style.color = 'var(--text)';
                   }}
                 >
                   {brand}
@@ -632,7 +722,9 @@ export default function Home() {
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', flexWrap: 'wrap', gap: '20px' }}>
             <h2 className="font-condensed" style={{ fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1' }}>What Riders Say</h2>
-            <p style={{ color: '#777', fontSize: '16px', fontWeight: '600' }}>4.9 / 5 from 200+ reviews</p>
+            <p style={{ color: '#777', fontSize: '16px', fontWeight: '600' }}>
+              {reviews.length > 0 ? `${averageReviewRating} / 5 from ${reviews.length}+ reviews` : 'Verified rider feedback from our customers'}
+            </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
@@ -661,7 +753,7 @@ export default function Home() {
                       )}
                     </div>
                     {rev.product && (
-                      <Link to={`/product/${rev.product._id}`} style={{ color: 'var(--text)', opacity: 0.5 }}>
+                      <Link to={`/product/${rev.product._id || rev.product.id}`} style={{ color: 'var(--text)', opacity: 0.5 }}>
                         <ArrowRight size={18} />
                       </Link>
                     )}
@@ -698,34 +790,42 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="home-brands-container">
-            <p className="home-brands-title">Premium Parts Manufacturers</p>
-            <div className="home-brands-list">
+          <div className="home-brands-container" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '40px' }}>
+            <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Premium Parts Manufacturers</p>
+            <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
               {['Brembo', 'Ohlins', 'Akrapovic', 'Motul', 'K&N', 'RK Chain', 'EBC Brakes'].map(brand => (
                 <Link 
                   key={brand} 
                   to={`/products?brand=${brand}`}
+                  className="brand-chip"
                   style={{ 
-                    fontSize: '20px', 
-                    fontWeight: '800', 
+                    fontSize: '13px', 
+                    fontWeight: '700', 
                     textTransform: 'uppercase', 
-                    fontFamily: "'Barlow Condensed', sans-serif", 
                     letterSpacing: '1px',
                     textDecoration: 'none',
-                    color: 'inherit',
+                    color: 'var(--text)',
+                    background: 'var(--bg2)',
+                    border: '1px solid var(--border)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-                    display: 'inline-block',
-                    opacity: 0.7
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '100px'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.opacity = '1';
-                    e.currentTarget.style.textShadow = '0 0 20px rgba(255,255,255,0.3)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = 'var(--text)';
+                    e.currentTarget.style.background = 'var(--text)';
+                    e.currentTarget.style.color = 'var(--bg)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.opacity = '0.7';
-                    e.currentTarget.style.textShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.background = 'var(--bg2)';
+                    e.currentTarget.style.color = 'var(--text)';
                   }}
                 >
                   {brand}

@@ -6,19 +6,29 @@ import { ChevronRight } from 'lucide-react';
 const TYRES_MENU = {
   columns: [
     {
-      heading: 'Categories',
+      heading: 'Car Tyres',
       items: [
-        { label: 'ADV & Dual Sport', href: '/products?type=tyre&category=ADV+%26+Dual+Sport' },
-        { label: 'Sport', href: '/products?type=tyre&category=Sport' },
-        { label: 'Touring', href: '/products?type=tyre&category=Touring' },
-        { label: 'Cruiser', href: '/products?type=tyre&category=Cruiser' },
-        { label: 'Dirt / Off-road', href: '/products?type=tyre&category=Off-Road' },
-        { label: 'Scooter', href: '/products?type=tyre&category=Scooter' },
-        { label: 'Vintage', href: '/products?type=tyre&category=Vintage' },
+        { label: 'Hatchback', href: '/products?type=tyre&vehicle=car&category=hatchback' },
+        { label: 'Sedan', href: '/products?type=tyre&vehicle=car&category=sedan' },
+        { label: 'SUV / 4x4', href: '/products?type=tyre&vehicle=car&category=suv' },
+        { label: 'EV', href: '/products?type=tyre&vehicle=car&category=ev' },
+        { label: 'Performance', href: '/products?type=tyre&vehicle=car&category=sport' },
+        { label: 'All-Terrain', href: '/products?type=tyre&vehicle=car&category=off-road' },
       ],
     },
     {
-      heading: 'Popular Brands',
+      heading: 'Motorcycle Tyres',
+      items: [
+        { label: 'ADV & Dual Sport', href: '/products?type=tyre&vehicle=motorcycle&category=adv' },
+        { label: 'Super Sports', href: '/products?type=tyre&vehicle=motorcycle&category=sport' },
+        { label: 'Sport Touring', href: '/products?type=tyre&vehicle=motorcycle&category=touring' },
+        { label: 'Cruiser', href: '/products?type=tyre&vehicle=motorcycle&category=cruiser' },
+        { label: 'Motocross', href: '/products?type=tyre&vehicle=motorcycle&category=motocross' },
+        { label: 'Vintage', href: '/products?type=tyre&vehicle=motorcycle&category=vintage' },
+      ],
+    },
+    {
+      heading: 'Top Tyre Brands',
       items: [
         { label: 'Michelin', href: '/products?type=tyre&brand=Michelin' },
         { label: 'Pirelli', href: '/products?type=tyre&brand=Pirelli' },
@@ -42,7 +52,8 @@ const TYRES_MENU = {
     {
       heading: 'Quick Links',
       items: [
-        { label: 'Shop All Tyres', href: '/products?type=tyre', highlight: true },
+        { label: 'Shop Car Tyres', href: '/products?type=tyre&vehicle=car', highlight: true },
+        { label: 'Shop Motorcycle Tyres', href: '/products?type=tyre&vehicle=motorcycle', highlight: true },
         { label: 'Tyre Finder', href: '/' },
         { label: 'Best Tyres Guide', href: '/guides/how-to-choose-tyres' },
       ],
@@ -72,7 +83,7 @@ const PARTS_MENU = {
       ],
     },
     {
-      heading: 'Popular Parts',
+      heading: 'Popular Performance Parts',
       items: [
         { label: 'Brake Pads', href: '/products?type=part&category=Brakes' },
         { label: 'Shock Absorbers', href: '/products?type=part&category=Suspension' },
@@ -82,7 +93,7 @@ const PARTS_MENU = {
     {
       heading: 'Quick Links',
       items: [
-        { label: 'Shop All Parts', href: '/products?type=part', highlight: true },
+        { label: 'Shop All Performance Parts', href: '/products?type=part', highlight: true },
         { label: 'Installation', href: '/guides' },
         { label: 'Maintenance', href: '/guides' },
       ],
@@ -225,7 +236,7 @@ export default function MegaMenu() {
 
   const keep = () => clearTimeout(leaveTimer.current);
 
-  const NAV_LABELS = ['TYRES', 'PARTS', 'GUIDES'];
+  const NAV_LABELS = ['TYRES', 'PERFORMANCE PARTS', 'GUIDES'];
 
   return (
     <>
@@ -344,7 +355,7 @@ export default function MegaMenu() {
           style={{ position: 'absolute', top: '100%', left: 0, width: '100%', zIndex: 997 }}
         >
           {activeMenu === 'TYRES' && <MegaDropdown menu={TYRES_MENU} visible />}
-          {activeMenu === 'PARTS' && <MegaDropdown menu={PARTS_MENU} visible />}
+          {activeMenu === 'PERFORMANCE PARTS' && <MegaDropdown menu={PARTS_MENU} visible />}
           {activeMenu === 'GUIDES' && <GuidesDropdown visible left={guidesLeft} />}
         </div>
       )}

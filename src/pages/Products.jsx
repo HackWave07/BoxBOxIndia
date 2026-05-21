@@ -18,7 +18,7 @@ import { useFilter } from '../context/FilterContext';
 import { useVehicle } from '../context/VehicleContext';
 
 // Utils
-import { matchFilter, normalize } from '../utils/filterUtils';
+import { matchFilter, matchesVehicleGroup } from '../utils/filterUtils';
 
 export default function Products({ preFilterCategory }) {
   const [products, setProducts] = useState([]);
@@ -32,6 +32,7 @@ export default function Products({ preFilterCategory }) {
     categories: [],
     brands: [],
     sizes: [],
+    vehicleGroups: [],
     priceRange: { min: null, max: null },
     search: ''
   });
@@ -64,14 +65,16 @@ export default function Products({ preFilterCategory }) {
     const b = params.get('brand');
     const s = params.get('search');
     const sz = params.get('size');
+    const vehicle = params.get('vehicle');
 
     setFilters(prev => ({
       ...prev,
-      categories: cat ? [cat] : prev.categories,
-      types: t ? [t] : prev.types,
-      brands: b ? [b] : prev.brands,
-      sizes: sz ? [sz] : prev.sizes,
-      search: s || prev.search
+      categories: cat ? [cat] : [],
+      types: t ? [t] : [],
+      brands: b ? [b] : [],
+      sizes: sz ? [sz] : [],
+      vehicleGroups: vehicle ? [vehicle] : [],
+      search: s || ''
     }));
   }, [location.search, preFilterCategory]);
 
@@ -117,6 +120,11 @@ export default function Products({ preFilterCategory }) {
     // Types (OR)
     if (filters.types.length > 0) {
       result = result.filter(p => filters.types.some(t => matchFilter(p.type || 'tyre', t)));
+    }
+
+    // Vehicle group, used by tyre entry points so motorcycle results do not include car tyres.
+    if (filters.vehicleGroups.length > 0) {
+      result = result.filter(p => filters.vehicleGroups.some(vehicle => matchesVehicleGroup(p, vehicle)));
     }
 
     // Categories (OR)
@@ -165,7 +173,7 @@ export default function Products({ preFilterCategory }) {
   };
 
   const clearAll = () => {
-    setFilters({ types: [], categories: [], brands: [], sizes: [], priceRange: { min: null, max: null }, search: '' });
+    setFilters({ types: [], categories: [], brands: [], sizes: [], vehicleGroups: [], priceRange: { min: null, max: null }, search: '' });
     clearGlobalContext();
   };
 
@@ -246,8 +254,12 @@ export default function Products({ preFilterCategory }) {
           ) : (!filteredProducts || filteredProducts.length === 0) ? (
             <div style={{ textAlign: 'center', padding: '100px 0' }}>
               <SearchX size={64} style={{ margin: '0 auto 20px', opacity: 0.3 }} />
-              <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>No products found</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Try adjusting your filters or search term</p>
+              <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>
+                {activeVehicle ? 'No matching tyres found for your vehicle' : 'No products found'}
+              </h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+                {activeVehicle ? `Try a different year, model, or clear your vehicle selection to broaden the search.` : 'Try adjusting your filters or search term.'}
+              </p>
               <button onClick={clearAll} style={{ background: 'var(--text)', color: 'var(--bg)', border: 'none', padding: '10px 24px', borderRadius: '4px', fontWeight: '700', cursor: 'pointer' }}>Clear All Filters</button>
             </div>
           ) : (

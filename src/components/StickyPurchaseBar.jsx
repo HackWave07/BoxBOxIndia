@@ -1,9 +1,13 @@
 import React from 'react';
-import { ShoppingCart, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ArrowRight, MessageSquare } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/media';
 
 const StickyPurchaseBar = ({ product, show, onAddToCart, onBuyNow }) => {
   if (!product) return null;
+  const stockValue = Number(product.stock);
+  const isOutOfStock = Number.isFinite(stockValue) ? stockValue <= 0 : false;
+  const whatsappText = encodeURIComponent(`Hi BOXBOX India, I want to enquire about restock availability for ${product.brand} ${product.name}.`);
+  const whatsappLink = `https://wa.me/919022229979?text=${whatsappText}`;
 
   return (
     <div 
@@ -51,26 +55,44 @@ const StickyPurchaseBar = ({ product, show, onAddToCart, onBuyNow }) => {
         {/* RIGHT: CTAs */}
         <div className="sticky-buy-bar__actions" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ textAlign: 'right' }}>
-            <p className="mobile-hide" style={{ fontSize: '11px', color: 'var(--sticky-subtext)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Price</p>
+            <p className="mobile-hide" style={{ fontSize: '11px', color: 'var(--sticky-subtext)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{isOutOfStock ? 'Stock' : 'Price'}</p>
             <p style={{ fontSize: '19px', fontWeight: '900', color: 'var(--sticky-text)', margin: 0 }}>₹{product.price.toLocaleString()}</p>
+            {isOutOfStock && (
+              <p style={{ fontSize: '11px', color: '#ff4444', fontWeight: '900', margin: '2px 0 0 0', textTransform: 'uppercase' }}>Out of Stock</p>
+            )}
           </div>
           
           <div className="sticky-buy-bar__buttons" style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              className="sticky-btn-secondary" 
-              onClick={onAddToCart}
-              style={{ padding: '10px 20px', fontSize: '13px', fontWeight: '700', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
-            >
-              <ShoppingCart size={14} />
-              <span className="mobile-hide">Add to Cart</span>
-            </button>
-            <button 
-              className="sticky-btn-primary" 
-              onClick={onBuyNow}
-              style={{ padding: '10px 24px', fontSize: '13px', fontWeight: '800', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              Buy Now
-            </button>
+            {isOutOfStock ? (
+              <a
+                className="sticky-btn-primary"
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ padding: '10px 24px', fontSize: '13px', fontWeight: '800', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+              >
+                <MessageSquare size={14} />
+                WhatsApp
+              </a>
+            ) : (
+              <>
+                <button 
+                  className="sticky-btn-secondary" 
+                  onClick={onAddToCart}
+                  style={{ padding: '10px 20px', fontSize: '13px', fontWeight: '700', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s' }}
+                >
+                  <ShoppingCart size={14} />
+                  <span className="mobile-hide">Add to Cart</span>
+                </button>
+                <button 
+                  className="sticky-btn-primary" 
+                  onClick={onBuyNow}
+                  style={{ padding: '10px 24px', fontSize: '13px', fontWeight: '800', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  Buy Now
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -21,9 +21,16 @@ export const normalize = (str) => {
 export const CATEGORY_MAP = {
   // Performance Sections
   'sport': ['Performance', 'Super Sports', 'Sport / Touring', 'Performance / Sports', 'Track / Street', 'Sport'],
+  'sports': ['Performance', 'Performance / Sports', 'Track / Street'],
+  'super sports': ['Super Sports', 'Sport'],
   'off-road': ['SUV/4x4', 'All-Terrain / Offroad', 'ADV & Dual Sport', 'Motocross', 'Offroad', 'Off-road', 'All Terrain'],
+  'all terrain': ['SUV/4x4', 'All-Terrain / Offroad', 'All Terrain'],
+  'mud terrain': ['SUV/4x4', 'All-Terrain / Offroad', 'Mud Terrain'],
+  'atv': ['ATV'],
   'cruiser': ['Cruiser', 'Cruisers'],
+  'cruisers': ['Cruiser', 'Cruisers'],
   'touring': ['Sport / Touring', 'Sport Touring', 'Touring'],
+  'sport touring': ['Sport / Touring', 'Sport Touring', 'Touring'],
   
   // Motorcycle Specific
   'adv': ['ADV & Dual Sport', 'Adventure', 'ADV'],
@@ -34,6 +41,7 @@ export const CATEGORY_MAP = {
   'hatchback': ['Hatchback / Small Cars', 'Hatchback'],
   'sedan': ['Sedan / Premium', 'Sedan'],
   'suv': ['SUV / MUV', 'SUV/4x4', 'SUV'],
+  'suv 4x4': ['SUV / MUV', 'SUV/4x4', 'SUV'],
   'ev': ['EV / Electric', 'Electric', 'EV'],
   
   // Parts
@@ -43,6 +51,65 @@ export const CATEGORY_MAP = {
   'engine': ['Engine Upgrades', 'Engine'],
   'exhaust': ['Exhaust Systems', 'Exhaust'],
   'accessories': ['Accessories']
+};
+
+const MOTORCYCLE_CATEGORIES = [
+  'ADV & Dual Sport',
+  'Adventure',
+  'Cruiser',
+  'Cruisers',
+  'Motocross',
+  'Dirt',
+  'MX',
+  'Scooter',
+  'Sport Touring',
+  'Super Sports',
+  'Vintage',
+  'Classic'
+];
+
+const CAR_CATEGORIES = [
+  'All Terrain',
+  'All-Terrain / Offroad',
+  'EV',
+  'EV / Electric',
+  'Electric',
+  'Hatchback',
+  'Hatchback / Small Cars',
+  'Performance',
+  'Performance / Sports',
+  'Sedan',
+  'Sedan / Premium',
+  'SUV',
+  'SUV/4x4',
+  'SUV / MUV',
+  'Track / Street'
+];
+
+export const getProductVehicleGroups = (product) => {
+  const groups = new Set();
+
+  product?.compatibility?.forEach((item) => {
+    const vehicleType = normalize(item?.vehicleType);
+    if (vehicleType === 'motorcycle' || vehicleType === 'bike') groups.add('motorcycle');
+    if (['car', 'suv', 'ev'].includes(vehicleType)) groups.add('car');
+  });
+
+  if (MOTORCYCLE_CATEGORIES.some(category => normalize(category) === normalize(product?.category))) {
+    groups.add('motorcycle');
+  }
+
+  if (CAR_CATEGORIES.some(category => normalize(category) === normalize(product?.category))) {
+    groups.add('car');
+  }
+
+  return [...groups];
+};
+
+export const matchesVehicleGroup = (product, vehicleGroup) => {
+  const normalizedVehicleGroup = normalize(vehicleGroup);
+  if (!normalizedVehicleGroup) return true;
+  return getProductVehicleGroups(product).includes(normalizedVehicleGroup);
 };
 
 /**

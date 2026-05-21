@@ -47,7 +47,7 @@ export default function Navbar() {
               onClick={handleLogoClick}
               style={{ display: 'flex', alignItems: 'center', minWidth: 0, textDecoration: 'none' }}
             >
-              <img src={logo} alt="BOXBOX" style={{ height: '35px', width: 'auto', objectFit: 'contain' }} />
+              <img src={logo} alt="BOXBOX" style={{ height: '46px', width: 'auto', objectFit: 'contain' }} />
             </Link>
           </div>
           

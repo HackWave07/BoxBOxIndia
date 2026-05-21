@@ -13,6 +13,8 @@ export default function SearchDropdown({ results, loading, query, visible, selec
 
   const handleRowClick = (item) => {
     if (item.type === 'product') navigate(`/product/${item.id}`);
+    else if (item.type === 'category' && item.name === 'All Tyres') navigate('/products?type=tyre');
+    else if (item.type === 'category' && item.name === 'Performance Parts') navigate('/products?type=part');
     else if (item.type === 'category') navigate(`/products?category=${item.name}`);
     else if (item.type === 'brand') navigate(`/products?brand=${item.name}`);
     onSelect();

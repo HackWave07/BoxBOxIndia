@@ -1,11 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Star, ShoppingCart, Truck, BadgeCheck } from 'lucide-react';
+import { Star, ShoppingCart, Truck, BadgeCheck, MessageSquare } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/media';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
+  const stockValue = Number(product.stock);
+  const isOutOfStock = Number.isFinite(stockValue) ? stockValue <= 0 : false;
+  const lowStock = Number.isFinite(stockValue) && stockValue > 0 && stockValue <= 5;
+  const whatsappText = encodeURIComponent(`Hi BOXBOX India, I want to enquire about the ${product.brand} ${product.name}`);
+  const whatsappLink = `https://wa.me/919022229979?text=${whatsappText}`;
 
   return (
     <div className="glass-panel animate-lift" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -55,15 +60,38 @@ export default function ProductCard({ product }) {
           <p className="product-card-size">Size: {product.tyreSize || product.size}</p>
         )}
         
-        <div className="product-card-footer">
-          <span className="product-card-price">₹{product.price?.toLocaleString()}</span>
-          <button 
-            className="product-card-add-btn btn-primary" 
-            onClick={() => addToCart(product)}
-          >
-            <ShoppingCart size={16} /> 
-            Add
-          </button>
+        <div className="product-card-footer" style={{ alignItems: 'flex-start', gap: '10px', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span className="product-card-price">₹{product.price?.toLocaleString()}</span>
+            {lowStock && (
+              <span style={{ color: '#ff7b00', fontWeight: '700', fontSize: '12px' }}>Only {product.stock} left</span>
+            )}
+          </div>
+
+          {isOutOfStock ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+              <span style={{ color: '#ff4444', fontWeight: '800', fontSize: '12px', textTransform: 'uppercase' }}>Out of Stock</span>
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="product-card-add-btn btn-primary"
+                style={{ justifyContent: 'center', textDecoration: 'none' }}
+              >
+                <MessageSquare size={16} /> Enquire on WhatsApp
+              </a>
+            </div>
+          ) : (
+            <button 
+              className="product-card-add-btn btn-primary" 
+              onClick={() => addToCart(product)}
+              disabled={isOutOfStock}
+              style={{ opacity: isOutOfStock ? 0.6 : 1, pointerEvents: isOutOfStock ? 'none' : 'auto' }}
+            >
+              <ShoppingCart size={16} /> 
+              Add
+            </button>
+          )}
         </div>
       </div>
     </div>
