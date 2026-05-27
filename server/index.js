@@ -93,6 +93,7 @@ const cspDirectives = isDev
         'https://lh3.googleusercontent.com',
         'https://checkout.razorpay.com',
         'https://api.razorpay.com',
+        'https://generativelanguage.googleapis.com',  // Gemini API
       ],
       frameSrc: [
         "'self'",
@@ -122,6 +123,7 @@ const cspDirectives = isDev
         'https://oauth2.googleapis.com',
         'https://checkout.razorpay.com',
         'https://api.razorpay.com',
+        'https://generativelanguage.googleapis.com',  // Gemini API
         'https://*.onrender.com',
         'https://*.vercel.app',
       ],
@@ -180,6 +182,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 // ─── Mount Routers ────────────────────────────────────────────────────────────
 // Mount routes with and without '/api' prefix to prevent 404s if VITE_API_URL is just the root URL
@@ -197,6 +200,9 @@ app.use('/auth', authRoutes);
 
 app.use('/api/reviews', reviewRoutes);
 app.use('/reviews', reviewRoutes);
+
+app.use('/api/chat', chatRoutes);
+app.use('/chat', chatRoutes);
 
 // ─── Seed / Reset Admin User ──────────────────────────────────────────────────
 // In development: always resets the admin password so a stale or

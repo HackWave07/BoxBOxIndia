@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Star, ShoppingCart, Truck, BadgeCheck, MessageSquare } from 'lucide-react';
 import { resolveMediaUrl } from '../utils/media';
+import ProtectedImage from './ProtectedImage';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -20,11 +21,12 @@ export default function ProductCard({ product }) {
             {product.badge}
           </span>
         )}
-        <img
+        <ProtectedImage
           src={resolveMediaUrl(product?.images?.[0] || product?.image) || 'https://via.placeholder.com/500?text=No+Image'}
           alt={product?.name || 'Product Image'}
           className="product-card-img"
-          style={{ width: '100%', height: '100%', maxWidth: '95%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', transition: 'transform 0.3s ease', display: 'block', transform: 'scale(1.15)' }}
+          style={{ width: '100%', height: '100%', maxWidth: '95%', maxHeight: '100%', borderRadius: '8px' }}
+          imgStyle={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px', transition: 'transform 0.3s ease', display: 'block', transform: 'scale(1.15)' }}
           onError={e => { e.currentTarget.src = 'https://via.placeholder.com/500?text=No+Image'; }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.2)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1.15)'; }}

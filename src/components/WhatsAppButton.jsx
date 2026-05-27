@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppButton() {
-  const [showTooltip, setShowTooltip] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Subtle delay for better entry feel
     const timer = setTimeout(() => setIsVisible(true), 500);
     return () => clearTimeout(timer);
   }, []);
@@ -23,36 +21,11 @@ export default function WhatsAppButton() {
       zIndex: 999,
       animation: 'fadeInUp 0.4s ease-out forwards' 
     }}>
-      {/* Tooltip - Desktop Only */}
-      <div style={{
-        position: 'absolute',
-        bottom: '72px',
-        right: '0',
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '8px 16px',
-        borderRadius: '12px',
-        fontSize: '13px',
-        fontWeight: '600',
-        color: '#fff',
-        whiteSpace: 'nowrap',
-        pointerEvents: 'none',
-        opacity: showTooltip ? 1 : 0,
-        transform: showTooltip ? 'translateY(0)' : 'translateY(10px)',
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
-        display: 'none', 
-      }} className="desktop-tooltip">
-        Chat with tyre expert
-      </div>
-
       <a
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        aria-label="Contact BoxBox on WhatsApp"
         style={{
           width: '56px',
           height: '56px',
@@ -82,11 +55,6 @@ export default function WhatsAppButton() {
         }
         .whatsapp-fab:active {
           transform: scale(0.95);
-        }
-        @media (min-width: 1024px) {
-          .desktop-tooltip {
-            display: block !important;
-          }
         }
         @media (max-width: 600px) {
           .whatsapp-fab {

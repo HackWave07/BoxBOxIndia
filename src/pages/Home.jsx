@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard';
 import TyreFinder from '../components/TyreFinder';
 import HeroSlider from '../components/HeroSlider';
 import SkeletonCard from '../components/SkeletonCard';
+import ProtectedImage, { stopImageAction } from '../components/ProtectedImage';
 import { useTheme } from '../context/ThemeContext';
 import { ShieldCheck, Truck, Wrench, Gauge, Mountain, Navigation, Map, Zap, Crosshair, MapPin, Clock, Tent, Shield, Car, Gem, Battery, Star, ArrowRight } from 'lucide-react';
 import axios from 'axios';
@@ -52,6 +53,8 @@ const CarTyreCard = ({ cat, delay }) => {
   return (
     <Link
       to={cat.path}
+      onContextMenu={stopImageAction}
+      onDragStart={stopImageAction}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="category-card-premium"
@@ -104,7 +107,6 @@ const CarTyreCard = ({ cat, delay }) => {
           : 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.3), transparent)',
         transition: 'background 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
       }} />
-
       {/* Content Layer */}
       <div className="category-card-premium-content" style={{ color: '#FFFFFF' }}>
         <h3 className="font-condensed category-card-premium-title" style={{
@@ -144,6 +146,8 @@ const MotoCard = ({ cat, delay }) => {
   return (
     <Link 
       to={cat.path} 
+      onContextMenu={stopImageAction}
+      onDragStart={stopImageAction}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="category-card-premium"
@@ -175,10 +179,11 @@ const MotoCard = ({ cat, delay }) => {
 
       {/* Image Layer - Full controlled scaling */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <img 
+        <ProtectedImage
           src={cat.image} 
           alt={cat.name}
-          style={{
+          style={{ width: '100%', height: '100%' }}
+          imgStyle={{
             height: '100%',
             width: '100%',
             objectFit: cat.objectFit || 'contain', // Guarantee no cutting of the tyre visual unless specified
@@ -240,6 +245,8 @@ const PerformanceCard = ({ cat, delay }) => {
   return (
     <Link 
       to={cat.path} 
+      onContextMenu={stopImageAction}
+      onDragStart={stopImageAction}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="performance-card-premium"
@@ -281,7 +288,6 @@ const PerformanceCard = ({ cat, delay }) => {
         transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
         transform: isHovered ? 'scale(1.05)' : 'scale(1)',
       }} />
-
       {/* Premium Overlay Layer */}
       <div style={{
         position: 'absolute',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { stopImageAction } from './ProtectedImage';
 
 const slides = [
   {
@@ -67,7 +68,7 @@ export default function HeroSlider() {
   const isRight = slide.position === 'right';
 
   return (
-    <div className="hero-slider-container" style={{ overflow: 'hidden' }}>
+    <div className="hero-slider-container" onContextMenu={stopImageAction} onDragStart={stopImageAction} style={{ overflow: 'hidden', WebkitTouchCallout: 'none', userSelect: 'none' }}>
 
       {/* Background image layer */}
       <div

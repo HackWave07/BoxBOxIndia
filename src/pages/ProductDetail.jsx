@@ -10,6 +10,7 @@ import axios from 'axios';
 import TyreSizeDrawer from '../components/TyreSizeDrawer';
 import { resolveMediaUrl } from '../utils/media';
 import { updateSEO } from '../utils/seo';
+import ProtectedImage, { stopImageAction } from '../components/ProtectedImage';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -218,6 +219,8 @@ export default function ProductDetail() {
         <div className="product-gallery-container">
           <div
             className="glass-panel product-detail-gallery-main"
+            onContextMenu={stopImageAction}
+            onDragStart={stopImageAction}
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setZoomPos(prev => ({ ...prev, show: true }))}
             onMouseLeave={() => setZoomPos(prev => ({ ...prev, show: false }))}
@@ -233,17 +236,22 @@ export default function ProductDetail() {
               cursor: 'zoom-in'
             }}
           >
-            <img
+            <ProtectedImage
               src={activeImage || 'https://via.placeholder.com/500?text=No+Image'}
               onError={(e) => { e.currentTarget.src = "https://via.placeholder.com/500?text=No+Image"; }}
               alt={product?.name}
               style={{
                 width: '100%',
                 height: '100%',
+                borderRadius: '8px',
+                opacity: zoomPos.show ? 0 : 1,
+                transition: 'opacity 0.3s ease'
+              }}
+              imgStyle={{
+                width: '100%',
+                height: '100%',
                 objectFit: 'contain',
                 borderRadius: '8px',
-                transition: 'opacity 0.3s ease',
-                opacity: zoomPos.show ? 0 : 1
               }}
             />
             {zoomPos.show && (
@@ -275,10 +283,11 @@ export default function ProductDetail() {
                   zIndex: activeImage === img ? 1 : 0
                 }}
               >
-                <img
+                <ProtectedImage
                   src={img}
                   alt={`thumbnail-${i}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: activeImage === img ? 1 : 0.6 }}
+                  style={{ width: '100%', height: '100%' }}
+                  imgStyle={{ width: '100%', height: '100%', objectFit: 'cover', opacity: activeImage === img ? 1 : 0.6 }}
                 />
               </div>
             ))}
