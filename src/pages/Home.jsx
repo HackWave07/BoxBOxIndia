@@ -76,29 +76,6 @@ const homeFeaturedFallbacks = [
   }
 ];
 
-const curatedHomepageFeatured = [
-  {
-    brand: 'Michelin',
-    name: 'Pilot Sport 4S',
-    fallback: homeFeaturedFallbacks[1]
-  },
-  {
-    brand: 'Pirelli',
-    name: 'Scorpion Rally STR',
-    fallback: homeFeaturedFallbacks[2]
-  },
-  {
-    brand: 'Metzeler',
-    name: 'Roadtec 01 SE',
-    fallback: homeFeaturedFallbacks[0]
-  },
-  {
-    brand: 'Pirelli',
-    name: 'P Zero Trofeo R',
-    fallback: homeFeaturedFallbacks[3]
-  }
-];
-
 const homeReviewFallbacks = [
   {
     _id: 'boxbox-testimonial-1',
@@ -136,17 +113,6 @@ const HomeFeaturedFallbackCard = ({ item }) => (
     </a>
   </div>
 );
-
-const normalizeProductText = (value = '') => value.toString().trim().toLowerCase();
-
-const findCuratedProduct = (products, curatedItem) => {
-  if (!Array.isArray(products)) return null;
-
-  return products.find(product =>
-    normalizeProductText(product?.brand) === normalizeProductText(curatedItem.brand) &&
-    normalizeProductText(product?.name) === normalizeProductText(curatedItem.name)
-  ) || null;
-};
 
 const CarTyreCard = ({ cat, delay }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -435,10 +401,7 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const curatedFeaturedSlots = curatedHomepageFeatured.map(item => ({
-    ...item,
-    product: findCuratedProduct(featured, item)
-  }));
+  const featuredFallbackSlots = homeFeaturedFallbacks.slice(featured.length, 4);
   const displayedReviews = homeReviewFallbacks;
   const averageReviewRating = displayedReviews.length > 0 ? (displayedReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / displayedReviews.length).toFixed(1) : null;
 
@@ -455,7 +418,7 @@ export default function Home() {
           productsArray = data.data;
         }
         
-        setFeatured(productsArray);
+        setFeatured(productsArray.filter(product => product?.featuredOnHome).slice(0, 4));
         setLoading(false);
       } catch (error) {
         console.error('Error fetching home data', error);
@@ -558,13 +521,14 @@ export default function Home() {
           {loading ? (
             [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
           ) : (
-            curatedFeaturedSlots.map(item => (
-              item.product ? (
-                <ProductCard key={item.product._id || item.product.id} product={{...item.product, id: item.product._id || item.product.id}} />
-              ) : (
-                <HomeFeaturedFallbackCard key={`${item.brand}-${item.name}`} item={item.fallback} />
-              )
-            ))
+            <>
+              {featured.map(product => (
+                <ProductCard key={product._id || product.id} product={{...product, id: product._id || product.id}} />
+              ))}
+              {featuredFallbackSlots.map(item => (
+                <HomeFeaturedFallbackCard key={item.title} item={item} />
+              ))}
+            </>
           )}
         </div>
         </div>

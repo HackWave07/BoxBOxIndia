@@ -13,6 +13,7 @@ const productSchema = new mongoose.Schema({
   rating: { type: Number, default: 0 },
   reviews: { type: Number, default: 0 },
   badge: { type: String, default: null },
+  featuredOnHome: { type: Boolean, default: false },
   specs: { type: Object, default: {} },
   compatibility: [{
     vehicleType: String,

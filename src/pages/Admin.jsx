@@ -22,7 +22,7 @@ export default function Admin() {
 
   const initialForm = {
     type: ' tyre', name: '', brand: '', price: '', category: '', tyreSize: '', stock: '', images: [''], description: '',
-    grip: '', durability: '', mileage: ''
+    grip: '', durability: '', mileage: '', featuredOnHome: false
   };
   const [form, setForm] = useState(initialForm);
 
@@ -48,7 +48,7 @@ export default function Admin() {
     fetchProducts();
   }, []);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
   const openModal = (product = null) => {
     if (product) {
@@ -63,6 +63,7 @@ export default function Admin() {
         stock: product.stock || '',
         images: product.images && product.images.length > 0 ? product.images : [product.image || ''],
         description: product.description || '',
+        featuredOnHome: Boolean(product.featuredOnHome),
         grip: product.specs?.grip || '',
         durability: product.specs?.durability || '',
         mileage: product.specs?.mileage || ''
@@ -89,6 +90,7 @@ export default function Admin() {
         tyreSize: form.type === 'tyre' ? form.tyreSize : 'N/A', stock: Number(form.stock),
         images: filteredImages,
         description: form.description,
+        featuredOnHome: Boolean(form.featuredOnHome),
         specs: { grip: form.grip, durability: form.durability, mileage: form.mileage }
       };
 
@@ -240,6 +242,9 @@ export default function Admin() {
                     <div>
                       <p style={{ fontWeight: '600' }}>{p.name}</p>
                       <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.tyreSize || p.size}</p>
+                      {p.featuredOnHome && (
+                        <p style={{ fontSize: '11px', color: 'var(--text)', fontWeight: '800', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Featured on homepage</p>
+                      )}
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>{p.brand}</td>
@@ -315,6 +320,16 @@ export default function Admin() {
                   </div>
 
                   <textarea name="description" placeholder="Product Description *" value={form.description} onChange={handleChange} required style={{ ...inputStyle, height: '120px', resize: 'vertical' }} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
+                    <input
+                      type="checkbox"
+                      name="featuredOnHome"
+                      checked={Boolean(form.featuredOnHome)}
+                      onChange={handleChange}
+                      style={{ width: '16px', height: '16px', accentColor: 'var(--text)' }}
+                    />
+                    Feature this product on homepage
+                  </label>
                 </div>
 
                 <div>
