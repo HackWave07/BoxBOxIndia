@@ -29,9 +29,17 @@ app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
 });
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = isDev 
-  ? [FRONTEND_ORIGIN, 'http://localhost:5173', 'http://localhost:5000'] 
-  : [FRONTEND_ORIGIN, 'https://boxboxindia.com', 'https://www.boxboxindia.com'];
+// Localhost origins are always allowed regardless of NODE_ENV.
+// When the frontend .env points VITE_API_URL at the Render backend, local dev
+// browsers send Origin: http://localhost:5173 to the production server.
+// Localhost cannot be spoofed by real-world browsers, so this is safe.
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'https://boxboxindia.com',
+  'https://www.boxboxindia.com',
+  FRONTEND_ORIGIN,          // honours FRONTEND_URL / CLIENT_URL env override
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Bot, Send, X, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getSafeApiUrl } from '../utils/media';
 
 const quickReplies = [
   'Find tyres by vehicle',
@@ -45,14 +46,9 @@ export default function AISupportChat() {
     setTyping(true);
 
     try {
-      // Determine API base URL
-      const apiBase = process.env.REACT_APP_API_URL || 
-                      process.env.VITE_API_URL ||
-                      window.location.hostname === 'localhost' 
-                        ? 'http://localhost:5000' 
-                        : window.location.origin;
-
-      const response = await fetch(`${apiBase}/api/chat`, {
+      // getSafeApiUrl() returns the /api base (e.g. https://boxboxindia.onrender.com/api)
+      // so we append /chat, not /api/chat.
+      const response = await fetch(`${getSafeApiUrl()}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

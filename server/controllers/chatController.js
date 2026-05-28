@@ -195,18 +195,19 @@ exports.chat = async (req, res) => {
     }
 
     if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY is not set in environment');
       return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
     }
 
     // Get or initialize conversation history for this session
     let history = conversationHistory.get(sessionId) || [];
 
-    // Define tools for Gemini
+    // Define tools for Gemini — must use `parameters`, not `inputSchema`
     const tools = [
       {
         name: 'searchProducts',
         description: 'Search for tyres and motorcycle products by name, brand, or vehicle type',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {
             query: {
@@ -224,7 +225,7 @@ exports.chat = async (req, res) => {
       {
         name: 'getProductById',
         description: 'Get detailed information about a specific product by ID',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {
             productId: {
@@ -238,7 +239,7 @@ exports.chat = async (req, res) => {
       {
         name: 'getStock',
         description: 'Check stock availability for a product',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {
             productId: {
@@ -252,7 +253,7 @@ exports.chat = async (req, res) => {
       {
         name: 'trackOrder',
         description: 'Track an order status by order ID',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {
             orderId: {
@@ -266,7 +267,7 @@ exports.chat = async (req, res) => {
       {
         name: 'getShippingInfo',
         description: 'Get information about shipping, delivery, and service areas',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {}
         }
@@ -274,7 +275,7 @@ exports.chat = async (req, res) => {
       {
         name: 'getHelpArticle',
         description: 'Get information from help articles (refund policy, tyre size guide, etc.)',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {
             slug: {
@@ -288,7 +289,7 @@ exports.chat = async (req, res) => {
       {
         name: 'contactSupport',
         description: 'Get contact information for BoxBox support',
-        inputSchema: {
+        parameters: {
           type: 'object',
           properties: {}
         }
@@ -299,7 +300,7 @@ exports.chat = async (req, res) => {
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
       tools: [{ functionDeclarations: tools }],
-      systemInstruction: `You are BoxBox India's premium AI support assistant for motorcycles, scooters, and tyres. 
+      systemInstruction: `You are BoxBox India's premium AI support assistant for motorcycles, scooters, and tyres.
 Your role is to:
 - Help users find the right tyres for their vehicles with expert guidance
 - Check stock availability and provide product information
@@ -312,94 +313,50 @@ Your role is to:
 - If backend data is unavailable, be honest and suggest contacting WhatsApp support`
     });
 
-    // Add user message to history
-    history.push({
-      role: 'user',
-      parts: [{ text: message }]
-    });
+    // Start chat with existing prior history only (not the current user message).
+    // sendMessage() below adds the current user turn — passing it in history too
+    // would duplicate it and cause Gemini to reject the request.
+    const chat = model.startChat({ history: [...history] });
 
-    // Send message to Gemini
-    let fullResponse = '';
-    let toolCalls = [];
-    let finalResponse = null;
-
-    const chat = model.startChat({ history });
+    // Send the current user message
     const result = await chat.sendMessage(message);
 
-    // Handle tool use and function calling
-    let continueLoop = true;
-    while (continueLoop) {
-      const responseText = result.response.text();
-      const candidates = result.response.candidates || [];
-      
-      if (!candidates.length || candidates[0].finishReason === 'STOP') {
-        fullResponse = responseText;
-        continueLoop = false;
-        break;
+    let fullResponse = '';
+
+    // Check if Gemini wants to call a function.
+    // Calling result.response.text() when the response contains a function call
+    // (instead of text) throws a GoogleGenerativeAIResponseError, so we must
+    // check for function calls first.
+    const functionCalls = typeof result.response.functionCalls === 'function'
+      ? result.response.functionCalls()
+      : [];
+
+    if (functionCalls && functionCalls.length > 0) {
+      // Process each function call and collect responses
+      const functionResponses = [];
+      for (const fc of functionCalls) {
+        console.log(`📞 Function call: ${fc.name}`);
+        const toolResult = await processTool(fc.name, fc.args);
+        functionResponses.push({
+          functionResponse: { name: fc.name, response: toolResult }
+        });
       }
 
-      // Check for function calls in the response
-      let hasFunctionCall = false;
-      for (const candidate of candidates) {
-        const content = candidate.content?.parts || [];
-        for (const part of content) {
-          if (part.functionCall) {
-            hasFunctionCall = true;
-            const toolName = part.functionCall.name;
-            const toolInput = part.functionCall.args;
-
-            console.log(`📞 Function call: ${toolName}`);
-
-            // Process the tool call
-            const toolResult = await processTool(toolName, toolInput);
-            
-            // Add to history and continue conversation
-            history.push({
-              role: 'model',
-              parts: [{ functionCall: { name: toolName, args: toolInput } }]
-            });
-
-            history.push({
-              role: 'user',
-              parts: [{ functionResponse: { name: toolName, response: toolResult } }]
-            });
-
-            // Continue chat with tool results
-            try {
-              const nextResult = await chat.sendMessage([{
-                functionResponse: { name: toolName, response: toolResult }
-              }]);
-              
-              fullResponse = nextResult.response.text();
-              
-              // Check if this is the final response
-              if (nextResult.response.candidates?.[0]?.finishReason === 'STOP') {
-                continueLoop = false;
-              }
-            } catch (error) {
-              console.error('Error continuing chat after tool call:', error);
-              continueLoop = false;
-            }
-          }
-        }
-      }
-
-      if (!hasFunctionCall) {
-        fullResponse = responseText;
-        continueLoop = false;
-      }
+      // Send all tool results back to Gemini to get the final text response
+      const nextResult = await chat.sendMessage(functionResponses);
+      fullResponse = nextResult.response.text();
+    } else {
+      fullResponse = result.response.text();
     }
 
-    // Add bot response to history
+    // Append this exchange to history for future turns
+    history.push({ role: 'user',  parts: [{ text: message }] });
     if (fullResponse) {
-      history.push({
-        role: 'model',
-        parts: [{ text: fullResponse }]
-      });
+      history.push({ role: 'model', parts: [{ text: fullResponse }] });
     }
 
-    // Store updated history
-    conversationHistory.set(sessionId, history);
+    // Cap history at 20 entries to prevent unbounded memory growth
+    conversationHistory.set(sessionId, history.slice(-20));
 
     return res.json({
       success: true,
@@ -408,10 +365,20 @@ Your role is to:
     });
 
   } catch (error) {
-    console.error('Chat error:', error);
+    const msg = error.message || String(error);
+    console.error('❌ Chat error:', msg);
+
+    // Detect the most common root causes so the console gives an actionable hint
+    if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid') || msg.includes('400')) {
+      console.error('💡 Fix: The GEMINI_API_KEY in server/.env is not valid.');
+      console.error('   Get a free key at https://aistudio.google.com/apikey and paste it into server/.env');
+    } else if (msg.includes('GEMINI_API_KEY not configured')) {
+      console.error('💡 Fix: Add GEMINI_API_KEY=<your-key> to server/.env');
+    }
+
     return res.status(500).json({
       success: false,
-      error: error.message || 'Failed to process chat message'
+      error: 'Failed to process chat message'
     });
   }
 };
