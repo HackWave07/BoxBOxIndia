@@ -26,6 +26,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
 import SEOLanding from './pages/SEOLanding';
+import AllReviews from './pages/AllReviews';
 import RefundPolicy from './pages/RefundPolicy';
 import { ShippingPolicy, TermsPolicy, PrivacyPolicy } from './pages/PolicyPages';
 
@@ -60,6 +61,7 @@ function App() {
             <Route path="/bike-tyres" element={<SEOLanding type="bike-tyres" />} />
             <Route path="/superbike-tyres" element={<SEOLanding type="superbike-tyres" />} />
             <Route path="/premium-tyres" element={<SEOLanding type="premium-tyres" />} />
+            <Route path="/reviews" element={<AllReviews />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/returns-policy" element={<RefundPolicy />} />
             <Route path="/shipping-policy" element={<ShippingPolicy />} />

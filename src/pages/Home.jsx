@@ -76,28 +76,10 @@ const homeFeaturedFallbacks = [
   }
 ];
 
-const homeReviewFallbacks = [
-  {
-    _id: 'boxbox-testimonial-1',
-    rating: 5,
-    comment: 'BoxBoxIndia helped me shortlist the right sport touring tyre without over-selling. The recommendation felt precise, practical, and confidence inspiring.',
-    userName: 'Aarav Mehta',
-    meta: 'Motorcycle tyre consultation'
-  },
-  {
-    _id: 'boxbox-testimonial-2',
-    rating: 5,
-    comment: 'The team understood my riding style and road conditions before suggesting options. That expert guidance made the purchase feel easy.',
-    userName: 'Nikhil Rao',
-    meta: 'Premium tyre support'
-  },
-  {
-    _id: 'boxbox-testimonial-3',
-    rating: 5,
-    comment: 'Clean communication, genuine products, and quick fitment guidance. It feels like a specialist store built for enthusiasts.',
-    userName: 'Rhea Kapoor',
-    meta: 'Verified customer experience'
-  }
+const FEATURED_REVIEW_IMAGES = [
+  { id: 1,  src: '/assets/reviews/review-1.png',  alt: 'Verified customer review' },
+  { id: 15, src: '/assets/reviews/review-15.png', alt: 'Verified customer review' },
+  { id: 3,  src: '/assets/reviews/review-3.png',  alt: 'Verified customer review' },
 ];
 
 const HomeFeaturedFallbackCard = ({ item }) => (
@@ -397,13 +379,65 @@ const PerformanceCard = ({ cat, delay }) => {
   );
 };
 
+const ReviewImageCard = ({ src, alt }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        borderRadius: '16px',
+        overflow: 'hidden',
+        border: '1px solid var(--border)',
+        background: 'var(--card)',
+        boxShadow: isHovered ? 'var(--shadow-hover)' : 'var(--shadow)',
+        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)',
+        transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div style={{ minHeight: '220px', background: 'var(--bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img
+          src={src}
+          alt={alt}
+          loading="eager"
+          style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }}
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+        />
+      </div>
+      <div style={{
+        padding: '14px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderTop: '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'flex', gap: '2px' }}>
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} size={13} fill="var(--text)" color="var(--text)" />
+          ))}
+        </div>
+        <span style={{
+          fontSize: '11px',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '1.5px',
+          color: 'var(--text-muted)',
+        }}>
+          Verified Review
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const featuredFallbackSlots = homeFeaturedFallbacks.slice(featured.length, 4);
-  const displayedReviews = homeReviewFallbacks;
-  const averageReviewRating = displayedReviews.length > 0 ? (displayedReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / displayedReviews.length).toFixed(1) : null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -715,45 +749,21 @@ export default function Home() {
       {/* 7. WHAT RIDERS SAY (TESTIMONIALS) */}
       <section className="home-section" style={{ background: 'var(--bg-gradient)' }}>
         <div className="section-full">
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', flexWrap: 'wrap', gap: '20px' }}>
-            <h2 className="font-condensed" style={{ fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1' }}>What Riders Say</h2>
-            <p style={{ color: '#777', fontSize: '16px', fontWeight: '600' }}>
-              {averageReviewRating} / 5 from curated BoxBoxIndia stories
-            </p>
+
+          <div className="section-heading-row" style={{ marginBottom: '48px' }}>
+            <div>
+              <h2 className="font-condensed" style={{ fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1', marginBottom: '10px' }}>What Riders Say</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '15px', fontWeight: '500' }}>Real experiences from the BoxBoxIndia community</p>
+            </div>
+            <Link to="/reviews" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              Show All Reviews <ArrowRight size={14} strokeWidth={2.4} />
+            </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
-            {displayedReviews.length > 0 ? (
-              displayedReviews.map((rev) => (
-                <div key={rev._id} className="glass-panel animate-lift" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}>
-                      {[...Array(5)].map((_, j) => <Star key={j} size={20} fill={j < rev.rating ? "var(--text)" : "transparent"} color="var(--text)" />)}
-                    </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '18px', lineHeight: '1.6', marginBottom: '32px' }}>"{rev.comment}"</p>
-                  </div>
-                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ fontWeight: '700', color: 'var(--text)', fontSize: '15px' }}>{rev.userName}</p>
-                      {!rev.product && rev.meta && (
-                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{rev.meta}</p>
-                      )}
-                      {rev.product && (
-                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Verified Buyer — {rev.product.brand} {rev.product.name}</p>
-                      )}
-                    </div>
-                    {rev.product && (
-                      <Link to={`/product/${rev.product._id || rev.product.id}`} style={{ color: 'var(--text)', opacity: 0.5 }}>
-                        <ArrowRight size={18} />
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', gridColumn: '1/-1' }}>No verified reviews yet. Join our community to share your experience!</p>
-            )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+            {FEATURED_REVIEW_IMAGES.map((review) => (
+              <ReviewImageCard key={review.id} src={review.src} alt={review.alt} />
+            ))}
           </div>
 
         </div>
