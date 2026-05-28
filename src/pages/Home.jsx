@@ -76,6 +76,29 @@ const homeFeaturedFallbacks = [
   }
 ];
 
+const curatedHomepageFeatured = [
+  {
+    brand: 'Michelin',
+    name: 'Pilot Sport 4S',
+    fallback: homeFeaturedFallbacks[1]
+  },
+  {
+    brand: 'Pirelli',
+    name: 'Scorpion Rally STR',
+    fallback: homeFeaturedFallbacks[2]
+  },
+  {
+    brand: 'Metzeler',
+    name: 'Roadtec 01 SE',
+    fallback: homeFeaturedFallbacks[0]
+  },
+  {
+    brand: 'Pirelli',
+    name: 'P Zero Trofeo R',
+    fallback: homeFeaturedFallbacks[3]
+  }
+];
+
 const homeReviewFallbacks = [
   {
     _id: 'boxbox-testimonial-1',
@@ -113,6 +136,17 @@ const HomeFeaturedFallbackCard = ({ item }) => (
     </a>
   </div>
 );
+
+const normalizeProductText = (value = '') => value.toString().trim().toLowerCase();
+
+const findCuratedProduct = (products, curatedItem) => {
+  if (!Array.isArray(products)) return null;
+
+  return products.find(product =>
+    normalizeProductText(product?.brand) === normalizeProductText(curatedItem.brand) &&
+    normalizeProductText(product?.name) === normalizeProductText(curatedItem.name)
+  ) || null;
+};
 
 const CarTyreCard = ({ cat, delay }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -400,11 +434,12 @@ const PerformanceCard = ({ cat, delay }) => {
 export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  const hasRealReviews = Array.isArray(reviews) && reviews.length > 0;
-  const displayedReviews = hasRealReviews ? reviews : homeReviewFallbacks;
+  const curatedFeaturedSlots = curatedHomepageFeatured.map(item => ({
+    ...item,
+    product: findCuratedProduct(featured, item)
+  }));
+  const displayedReviews = homeReviewFallbacks;
   const averageReviewRating = displayedReviews.length > 0 ? (displayedReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / displayedReviews.length).toFixed(1) : null;
 
   useEffect(() => {
@@ -420,27 +455,12 @@ export default function Home() {
           productsArray = data.data;
         }
         
-        setFeatured(productsArray.slice(0, 4));
+        setFeatured(productsArray);
         setLoading(false);
-
-        // Fetch featured reviews
-        try {
-          const reviewsRes = await axios.get(`${API_URL}/reviews/featured`);
-          if (Array.isArray(reviewsRes.data) && reviewsRes.data.length > 0) {
-            setReviews(reviewsRes.data);
-          } else {
-            setReviews([]);
-          }
-        } catch {
-          setReviews([]);
-        }
-        setReviewsLoading(false);
       } catch (error) {
         console.error('Error fetching home data', error);
         setFeatured([]);
         setLoading(false);
-        setReviews([]);
-        setReviewsLoading(false);
       }
     };
     fetchData();
@@ -537,13 +557,13 @@ export default function Home() {
         <div className="responsive-grid" style={{ gap: '24px' }}>
           {loading ? (
             [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
-          ) : Array.isArray(featured) && featured.length > 0 ? (
-            featured.map(product => (
-              <ProductCard key={product._id || product.id} product={{...product, id: product._id || product.id}} />
-            ))
           ) : (
-            homeFeaturedFallbacks.map(item => (
-              <HomeFeaturedFallbackCard key={item.title} item={item} />
+            curatedFeaturedSlots.map(item => (
+              item.product ? (
+                <ProductCard key={item.product._id || item.product.id} product={{...item.product, id: item.product._id || item.product.id}} />
+              ) : (
+                <HomeFeaturedFallbackCard key={`${item.brand}-${item.name}`} item={item.fallback} />
+              )
             ))
           )}
         </div>
@@ -735,20 +755,12 @@ export default function Home() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '60px', flexWrap: 'wrap', gap: '20px' }}>
             <h2 className="font-condensed" style={{ fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1' }}>What Riders Say</h2>
             <p style={{ color: '#777', fontSize: '16px', fontWeight: '600' }}>
-              {hasRealReviews ? `${averageReviewRating} / 5 from ${reviews.length}+ reviews` : 'Trusted guidance from BoxBoxIndia customers'}
+              {averageReviewRating} / 5 from curated BoxBoxIndia stories
             </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
-            {reviewsLoading ? (
-               [...Array(3)].map((_, i) => (
-                <div key={i} className="glass-panel" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', minHeight: '200px' }}>
-                  <div className="skeleton-loader" style={{ height: '20px', width: '40%', marginBottom: '20px' }} />
-                  <div className="skeleton-loader" style={{ height: '60px', width: '100%', marginBottom: '20px' }} />
-                  <div className="skeleton-loader" style={{ height: '20px', width: '30%' }} />
-                </div>
-              ))
-            ) : displayedReviews.length > 0 ? (
+            {displayedReviews.length > 0 ? (
               displayedReviews.map((rev) => (
                 <div key={rev._id} className="glass-panel animate-lift" style={{ padding: '40px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
