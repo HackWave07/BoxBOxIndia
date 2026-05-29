@@ -47,7 +47,7 @@ const StickyPurchaseBar = ({ product, show, onAddToCart, onBuyNow }) => {
               {product.name}
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--sticky-subtext)', fontWeight: '600', margin: '2px 0 0 0' }}>
-              {product.brand} • {product.tyreSize || product.size}
+              {product.brand}{(product.tyreSize || product.size) ? ` • ${product.tyreSize || product.size}` : ''}
             </p>
           </div>
         </div>

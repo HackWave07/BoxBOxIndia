@@ -340,16 +340,18 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '24px 0', marginBottom: '32px' }}>
-            <h4 style={{ fontWeight: '700', marginBottom: '16px', textTransform: 'uppercase', fontSize: '14px', letterSpacing: '1px' }}>Available Size</h4>
-            <div
-              onClick={() => setIsDrawerOpen(true)}
-              className="btn-secondary"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', borderColor: 'var(--text)', fontWeight: '700', cursor: 'pointer' }}
-            >
-              {selectedSize} <ChevronRight size={16} />
+          {product?.type !== 'part' && (
+            <div style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '24px 0', marginBottom: '32px' }}>
+              <h4 style={{ fontWeight: '700', marginBottom: '16px', textTransform: 'uppercase', fontSize: '14px', letterSpacing: '1px' }}>Available Size</h4>
+              <div
+                onClick={() => setIsDrawerOpen(true)}
+                className="btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', borderColor: 'var(--text)', fontWeight: '700', cursor: 'pointer' }}
+              >
+                {selectedSize} <ChevronRight size={16} />
+              </div>
             </div>
-          </div>
+          )}
 
           {isOutOfStock ? (
             <a
@@ -399,11 +401,11 @@ export default function ProductDetail() {
                 {[
                   ['Brand', product?.brand],
                   ['Category', product?.category],
-                  ['Size', product?.tyreSize || product?.size || 'N/A'],
+                  ...(product?.type !== 'part' ? [['Size', product?.tyreSize || product?.size || 'N/A']] : []),
                   ['Grip Level', product?.specs?.grip || 'Standard'],
                   ['Durability Class', product?.specs?.durability || 'Standard']
-                ].map(([key, val], i) => (
-                  <tr key={key} style={{ borderBottom: i === 4 ? 'none' : '1px solid var(--border)' }}>
+                ].map(([key, val], i, arr) => (
+                  <tr key={key} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--border)' }}>
                     <td style={{ padding: '20px 0', color: 'var(--text-muted)', width: '40%' }}>{key}</td>
                     <td style={{ padding: '20px 0', fontWeight: '700' }}>{val}</td>
                   </tr>
@@ -566,16 +568,18 @@ export default function ProductDetail() {
         onBuyNow={handleBuyNow}
       />
 
-      <TyreSizeDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        currentProduct={product}
-        onSelect={(size) => {
-          setIsDrawerOpen(false);
-          setSelectedSize(size);
-          navigate(`/products?size=${encodeURIComponent(size)}`);
-        }}
-      />
+      {product?.type !== 'part' && (
+        <TyreSizeDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          currentProduct={product}
+          onSelect={(size) => {
+            setIsDrawerOpen(false);
+            setSelectedSize(size);
+            navigate(`/products?size=${encodeURIComponent(size)}`);
+          }}
+        />
+      )}
 
       <style dangerouslySetInnerHTML={{ __html: `
         .animate-spin { animation: spin 1s linear infinite; }
