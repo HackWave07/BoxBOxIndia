@@ -89,6 +89,11 @@ const CAR_CATEGORIES = [
 export const getProductVehicleGroups = (product) => {
   const groups = new Set();
 
+  // Explicit vehicleCategory (set in admin) takes precedence over heuristics
+  if (product?.vehicleCategory === 'car') { groups.add('car'); return [...groups]; }
+  if (product?.vehicleCategory === 'motorcycle') { groups.add('motorcycle'); return [...groups]; }
+
+  // Fall back to compatibility array and category matching for older products
   product?.compatibility?.forEach((item) => {
     const vehicleType = normalize(item?.vehicleType);
     if (vehicleType === 'motorcycle' || vehicleType === 'bike') groups.add('motorcycle');

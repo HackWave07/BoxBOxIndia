@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   type: { type: String, enum: ['tyre', 'part'], default: 'tyre' },
+  vehicleCategory: { type: String, default: '' },
   name: { type: String, required: true },
   brand: { type: String, required: true },
   price: { type: Number, required: true },

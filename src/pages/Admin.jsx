@@ -21,8 +21,8 @@ export default function Admin() {
   const [uploading, setUploading] = useState(false);
 
   const initialForm = {
-    type: ' tyre', name: '', brand: '', price: '', category: '', tyreSize: '', stock: '', images: [''], description: '',
-    grip: '', durability: '', mileage: '', featuredOnHome: false
+    type: 'tyre', name: '', brand: '', price: '', category: '', tyreSize: '', stock: '', images: [''], description: '',
+    grip: '', durability: '', mileage: '', featuredOnHome: false, vehicleCategory: ''
   };
   const [form, setForm] = useState(initialForm);
 
@@ -66,7 +66,8 @@ export default function Admin() {
         featuredOnHome: Boolean(product.featuredOnHome),
         grip: product.specs?.grip || '',
         durability: product.specs?.durability || '',
-        mileage: product.specs?.mileage || ''
+        mileage: product.specs?.mileage || '',
+        vehicleCategory: product.vehicleCategory || ''
       });
     } else {
       setEditingId(null);
@@ -91,7 +92,8 @@ export default function Admin() {
         images: filteredImages,
         description: form.description,
         featuredOnHome: Boolean(form.featuredOnHome),
-        specs: { grip: form.grip, durability: form.durability, mileage: form.mileage }
+        specs: { grip: form.grip, durability: form.durability, mileage: form.mileage },
+        vehicleCategory: form.type === 'tyre' ? form.vehicleCategory : ''
       };
 
       if (editingId) {
@@ -339,27 +341,52 @@ export default function Admin() {
                     <option value="tyre">Tyre</option>
                     <option value="part">Automotive Part</option>
                   </select>
+                  {form.type === 'tyre' && (
+                    <select
+                      name="vehicleCategory"
+                      value={form.vehicleCategory}
+                      onChange={(e) => setForm({ ...form, vehicleCategory: e.target.value, category: '' })}
+                      required
+                      style={inputStyle}
+                    >
+                      <option value="" disabled>Vehicle Type *</option>
+                      <option value="car">Car Tyre</option>
+                      <option value="motorcycle">Motorcycle Tyre</option>
+                    </select>
+                  )}
                   <select name="category" value={form.category} onChange={handleChange} required style={inputStyle}>
                     <option value="" disabled>Select Category *</option>
                     {form.type === 'part' ? (
                       <>
                         <option value="Brakes">Brakes</option>
                         <option value="Suspension">Suspension</option>
-                        <option value="Chain">Chain & Sprockets</option>
-                        <option value="Engine">Engine</option>
-                        <option value="Exhaust">Exhaust</option>
+                        <option value="Chain & Sprockets">Chain & Sprockets</option>
+                        <option value="Engine Upgrades">Engine Upgrades</option>
+                        <option value="Exhaust Systems">Exhaust Systems</option>
                         <option value="Accessories">Accessories</option>
                       </>
-                    ) : (
+                    ) : form.vehicleCategory === 'car' ? (
                       <>
-                        <option value="Performance">Performance</option>
-                        <option value="Touring">Touring</option>
-                        <option value="SUV/4x4">SUV/4x4</option>
-                        <option value="Eco">Eco</option>
-                        <option value="EV">EV</option>
-                        <option value="All-Season">All-Season</option>
-                        <option value="Off-Road">Off-Road</option>
+                        <option value="Hatchback / Small Cars">Hatchback / Small Cars</option>
+                        <option value="Sedan / Premium">Sedan / Premium</option>
+                        <option value="SUV / MUV">SUV / MUV</option>
+                        <option value="EV / Electric">EV / Electric</option>
+                        <option value="Performance / Sports">Performance / Sports</option>
+                        <option value="All-Terrain / Offroad">All-Terrain / Offroad</option>
+                        <option value="Track / Street">Track / Street</option>
                       </>
+                    ) : form.vehicleCategory === 'motorcycle' ? (
+                      <>
+                        <option value="ADV & Dual Sport">ADV & Dual Sport</option>
+                        <option value="Cruiser">Cruiser</option>
+                        <option value="Sport / Touring">Sport / Touring</option>
+                        <option value="Super Sports">Super Sports</option>
+                        <option value="Motocross">Motocross</option>
+                        <option value="Vintage">Vintage</option>
+                        <option value="Scooter">Scooter</option>
+                      </>
+                    ) : (
+                      <option value="" disabled>Select vehicle type first</option>
                     )}
                   </select>
                   {form.type === 'tyre' && (
