@@ -68,7 +68,7 @@ export default function FilterSidebar({
 }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { types, categories, brands, sizes, priceRange } = filters;
+  const { types, categories, brands, sizes, priceRange, vehicleGroups = [] } = filters;
   const { types: allTypes, categories: allCats, brands: allBrands, sizes: allSizes } = availableOptions;
 
   const handleToggle = (group, value) => {
@@ -170,23 +170,47 @@ export default function FilterSidebar({
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           
           {/* PRODUCT TYPE */}
-          <FilterSection title="Vehicle Type">
+          <FilterSection title="Product Type">
             <div style={chipGridStyle}>
               {allTypes.map(t => {
                 const isActive = types.some(v => normalize(v) === normalize(t));
                 return (
-                  <button 
-                    key={t} 
+                  <button
+                    key={t}
                     onClick={() => handleToggle('types', t)}
                     style={getChipStyle(isActive)}
                     className="filter-chip"
                   >
-                    {t}
+                    {t === 'tyre' ? 'Tyre' : 'Parts'}
                   </button>
                 );
               })}
             </div>
           </FilterSection>
+
+          {/* TYRE CATEGORY — car vs motorcycle, only visible when tyres are in scope */}
+          {(types.length === 0 || types.some(v => normalize(v) === 'tyre')) && (
+            <FilterSection title="Tyre Category">
+              <div style={chipGridStyle}>
+                {[
+                  { value: 'car',        label: 'Car Tyre' },
+                  { value: 'motorcycle', label: 'Motorcycle Tyre' },
+                ].map(({ value, label }) => {
+                  const isActive = vehicleGroups.some(v => normalize(v) === normalize(value));
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => handleToggle('vehicleGroups', value)}
+                      style={getChipStyle(isActive)}
+                      className="filter-chip"
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </FilterSection>
+          )}
 
           {/* CATEGORY */}
           <FilterSection title="Category">

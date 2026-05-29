@@ -82,6 +82,53 @@ const FEATURED_REVIEW_IMAGES = [
   { id: 3,  src: '/assets/reviews/review-3.png',  alt: 'Verified customer review' },
 ];
 
+const MOTO_BRAND_LOGOS = {
+  'Michelin':    '/assets/logo/motorcycle_tyre/michelin.png',
+  'Pirelli':     '/assets/logo/motorcycle_tyre/pirelli.png',
+  'Metzeler':    '/assets/logo/motorcycle_tyre/metzeler.png',
+  'Dunlop':      '/assets/logo/motorcycle_tyre/dunlop.png',
+  'Shinko':      '/assets/logo/motorcycle_tyre/shinko.png',
+  'BFGoodrich':  '/assets/logo/motorcycle_tyre/bfgoodrich.png',
+  'Vredestein':  '/assets/logo/motorcycle_tyre/vredstein.png',
+  'Roadcruza':   '/assets/logo/motorcycle_tyre/roadcruza.png',
+  'Radar':       '/assets/logo/motorcycle_tyre/radar.png',
+  'Bridgestone': '/assets/logo/motorcycle_tyre/bridgestone.png',
+  'Goodyear':    '/assets/logo/motorcycle_tyre/goodyear.png',
+  'Continental': '/assets/logo/motorcycle_tyre/continental.png',
+  'Yokohama':    '/assets/logo/motorcycle_tyre/yokohama.png',
+  'Apollo':      '/assets/logo/motorcycle_tyre/apollo.png',
+  'CEAT':        '/assets/logo/motorcycle_tyre/ceat.png',
+  'MRF':         '/assets/logo/motorcycle_tyre/mrf.png',
+};
+
+const CAR_BRAND_LOGOS = {
+  'Michelin':    '/assets/logo/car_tyre/michelin.png',
+  'Bridgestone': '/assets/logo/car_tyre/bridgestone.png',
+  'Goodyear':    '/assets/logo/car_tyre/goodyear.png',
+  'Continental': '/assets/logo/car_tyre/continental.png',
+  'Pirelli':     '/assets/logo/car_tyre/pirelli.png',
+  'Yokohama':    '/assets/logo/car_tyre/yokohama.png',
+  'Apollo':      '/assets/logo/car_tyre/apollo.png',
+  'CEAT':        '/assets/logo/car_tyre/ceat.png',
+  'MRF':         '/assets/logo/car_tyre/mrf.png',
+};
+
+const PERF_BRAND_LOGOS = {
+  'Brembo':     '/assets/logo/performance_part/brembo.png',
+  'Ohlins':     '/assets/logo/performance_part/ohlins.png',
+  'Akrapovic':  '/assets/logo/performance_part/Akrapovic.png',
+  'Motul':      '/assets/logo/performance_part/motul.png',
+  'K&N':        '/assets/logo/performance_part/k&n.png',
+  'RK Chain':   '/assets/logo/performance_part/rk.png',
+  'EBC Brakes': '/assets/logo/performance_part/ebcbrakes.png',
+};
+
+const PERF_LOGO_SIZES = {
+  'Brembo':    { maxHeight: '44px', maxWidth: '140px' },
+  'Ohlins':    { maxHeight: '44px', maxWidth: '130px' },
+  'Akrapovic': { maxHeight: '44px', maxWidth: '155px' },
+};
+
 const HomeFeaturedFallbackCard = ({ item }) => (
   <div className="home-featured-fallback-card">
     <div>
@@ -634,43 +681,39 @@ export default function Home() {
 
           <div className="home-brands-container" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '40px' }}>
             <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
-            <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
               {['Michelin', 'Pirelli', 'Metzeler', 'Dunlop', 'Shinko', 'BFGoodrich', 'Vredestein', 'Roadcruza', 'Radar', 'Bridgestone', 'Goodyear', 'Continental', 'Yokohama', 'Apollo', 'CEAT', 'MRF'].map(brand => (
-                <Link 
-                  key={brand} 
-                  to={`/products?type=tyre&brand=${brand}`}
-                  className="brand-chip"
-                  style={{ 
-                    fontSize: '13px', 
-                    fontWeight: '700', 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '1px',
+                <Link
+                  key={brand}
+                  to={`/products?type=tyre&vehicle=motorcycle&brand=${brand}`}
+                  style={{
                     textDecoration: 'none',
-                    color: 'var(--text)',
-                    background: 'var(--bg2)',
+                    background: '#FFFFFF',
                     border: '1px solid var(--border)',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
+                    padding: '10px 22px',
+                    borderRadius: '12px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '100px'
+                    minWidth: '120px',
+                    height: '76px',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = 'var(--text)';
-                    e.currentTarget.style.background = 'var(--text)';
-                    e.currentTarget.style.color = 'var(--bg)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.background = 'var(--bg2)';
-                    e.currentTarget.style.color = 'var(--text)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  {brand}
+                  <img
+                    src={MOTO_BRAND_LOGOS[brand]}
+                    alt={brand}
+                    style={{ maxHeight: '50px', maxWidth: '148px', width: 'auto', height: 'auto', objectFit: 'contain' }}
+                    loading="lazy"
+                  />
                 </Link>
               ))}
             </div>
@@ -702,43 +745,39 @@ export default function Home() {
 
           <div className="home-brands-container" style={{ borderTop: '1px solid var(--border)', paddingTop: '40px', marginTop: '40px' }}>
             <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Authorised Dealer — Premium Brands</p>
-            <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
               {['Michelin', 'Bridgestone', 'Goodyear', 'Continental', 'Pirelli', 'Yokohama', 'Apollo', 'CEAT', 'MRF'].map(brand => (
-                <Link 
-                  key={brand} 
-                  to={`/products?type=tyre&brand=${brand}`}
-                  className="brand-chip"
-                  style={{ 
-                    fontSize: '13px', 
-                    fontWeight: '700', 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '1px',
+                <Link
+                  key={brand}
+                  to={`/products?type=tyre&vehicle=car&brand=${brand}`}
+                  style={{
                     textDecoration: 'none',
-                    color: 'var(--text)',
-                    background: 'var(--bg2)',
+                    background: '#FFFFFF',
                     border: '1px solid var(--border)',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
+                    padding: '10px 22px',
+                    borderRadius: '12px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '100px'
+                    minWidth: '120px',
+                    height: '76px',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = 'var(--text)';
-                    e.currentTarget.style.background = 'var(--text)';
-                    e.currentTarget.style.color = 'var(--bg)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.background = 'var(--bg2)';
-                    e.currentTarget.style.color = 'var(--text)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  {brand}
+                  <img
+                    src={CAR_BRAND_LOGOS[brand]}
+                    alt={brand}
+                    style={{ maxHeight: '50px', maxWidth: '148px', width: 'auto', height: 'auto', objectFit: 'contain' }}
+                    loading="lazy"
+                  />
                 </Link>
               ))}
             </div>
@@ -747,7 +786,7 @@ export default function Home() {
       </section>
 
       {/* 7. WHAT RIDERS SAY (TESTIMONIALS) */}
-      <section className="home-section" style={{ background: 'var(--bg-gradient)' }}>
+      <section className="home-section" style={{ background: 'var(--bg-gradient)', borderTop: '1px solid var(--border)' }}>
         <div className="section-full">
 
           <div className="section-heading-row" style={{ marginBottom: '48px' }}>
@@ -795,41 +834,38 @@ export default function Home() {
             <p className="home-brands-title" style={{ fontSize: '12px', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' }}>Premium Parts Manufacturers</p>
             <div className="home-brands-list" style={{ display: 'flex', justifyContent: 'center', gap: '12px 16px', flexWrap: 'wrap' }}>
               {['Brembo', 'Ohlins', 'Akrapovic', 'Motul', 'K&N', 'RK Chain', 'EBC Brakes'].map(brand => (
-                <Link 
-                  key={brand} 
+                <Link
+                  key={brand}
                   to={`/products?brand=${brand}`}
                   className="brand-chip"
-                  style={{ 
-                    fontSize: '13px', 
-                    fontWeight: '700', 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '1px',
+                  style={{
                     textDecoration: 'none',
-                    color: 'var(--text)',
-                    background: 'var(--bg2)',
+                    background: '#FFFFFF',
                     border: '1px solid var(--border)',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
+                    padding: '10px 20px',
+                    borderRadius: '12px',
                     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '100px'
+                    minWidth: '120px',
+                    height: '64px',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = 'var(--text)';
-                    e.currentTarget.style.background = 'var(--text)';
-                    e.currentTarget.style.color = 'var(--bg)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.background = 'var(--bg2)';
-                    e.currentTarget.style.color = 'var(--text)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-                  {brand}
+                  <img
+                    src={PERF_BRAND_LOGOS[brand]}
+                    alt={brand}
+                    style={{ maxHeight: PERF_LOGO_SIZES[brand]?.maxHeight || '40px', maxWidth: PERF_LOGO_SIZES[brand]?.maxWidth || '120px', width: 'auto', height: 'auto', objectFit: 'contain' }}
+                    loading="lazy"
+                  />
                 </Link>
               ))}
             </div>
