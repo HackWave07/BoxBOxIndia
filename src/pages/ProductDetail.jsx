@@ -318,7 +318,12 @@ export default function ProductDetail() {
             <p style={{ color: '#ff7b00', fontWeight: '800', fontSize: '14px', marginTop: '-20px', marginBottom: '28px' }}>
               Only {product.stock} left
             </p>
-          ) : null}
+          ) : (
+            <p style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700', color: '#22c55e', marginTop: '-20px', marginBottom: '28px' }}>
+              <CheckCircle2 size={14} />
+              In Stock
+            </p>
+          )}
 
           <div className="product-details-desc-box">
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '16px', marginBottom: '24px' }}>
@@ -359,26 +364,80 @@ export default function ProductDetail() {
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary"
-              style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
+              style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', textDecoration: 'none' }}
             >
               <MessageSquare size={20} />
               Enquire on WhatsApp
             </a>
           ) : (
-            <button
-              className="btn-primary"
-              style={{ width: '100%', padding: '18px', fontSize: '18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}
-              onClick={() => {
-                addToCart(product);
-                addToast(`${product.name} secured in cart`, 'success');
-              }}
-            >
-              <ShoppingCart size={20} />
-              Secure Add to Cart
-            </button>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                className="btn-secondary"
+                style={{ flex: 1, padding: '16px 20px', fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', minWidth: '130px', fontWeight: '700', cursor: 'pointer' }}
+                onClick={() => {
+                  addToCart(product);
+                  addToast(`${product.name} secured in cart`, 'success');
+                }}
+              >
+                <ShoppingCart size={18} />
+                Add to Cart
+              </button>
+              <button
+                className="btn-primary"
+                style={{ flex: 1, padding: '16px 20px', fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', minWidth: '130px', fontWeight: '800', cursor: 'pointer' }}
+                onClick={handleBuyNow}
+              >
+                Buy Now
+              </button>
+            </div>
           )}
+
+          {/* TRUST BADGES */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '20px' }}>
+            {[
+              { icon: Shield, label: 'Authorised Dealer' },
+              { icon: CheckCircle2, label: 'Secure Checkout' },
+              { icon: MessageSquare, label: '24/7 Support' },
+              { icon: Star, label: 'Expert Advice' },
+              { icon: Package, label: 'Fast Delivery' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 10px', border: '1px solid var(--border)', borderRadius: '20px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', background: 'var(--bg2)' }}>
+                <Icon size={11} />
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* COMPLETE YOUR SETUP */}
+      {product?.type !== 'part' && recommended.length > 0 && (
+        <div style={{ marginBottom: '48px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', marginBottom: '16px' }}>Complete Your Setup</h3>
+          <div className="scroll-x-mobile" style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px' }}>
+            {recommended.slice(0, 3).map(p => (
+              <Link key={p._id} to={`/product/${p._id}`} style={{ textDecoration: 'none', minWidth: '220px', flex: '0 0 220px' }}>
+                <div
+                  style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '14px', transition: 'all 0.2s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--text)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >
+                  <img
+                    src={resolveMediaUrl(p.images?.[0] || p.image)}
+                    alt={p.name}
+                    style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '8px', background: 'var(--bg)', flexShrink: 0 }}
+                  />
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.brand}</p>
+                    <p style={{ fontWeight: '700', fontSize: '13px', color: 'var(--text)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text)' }}>₹{p.price?.toLocaleString()}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* TABS */}
       <div style={{ marginBottom: '80px', marginTop: '40px' }}>
@@ -399,12 +458,23 @@ export default function ProductDetail() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 {[
+                  ['Type', product?.type === 'part' ? 'Performance Part' : 'Tyre'],
                   ['Brand', product?.brand],
                   ['Category', product?.category],
-                  ...(product?.type !== 'part' ? [['Size', product?.tyreSize || product?.size || 'N/A']] : []),
-                  ['Grip Level', product?.specs?.grip || 'Standard'],
-                  ['Durability Class', product?.specs?.durability || 'Standard']
-                ].map(([key, val], i, arr) => (
+                  ...(product?.type !== 'part' ? [
+                    ['Size', product?.tyreSize || product?.size || 'N/A'],
+                    ...(product?.specs?.pattern      ? [['Pattern',          product.specs.pattern]]      : []),
+                    ...(product?.specs?.width        ? [['Width',            product.specs.width]]        : []),
+                    ...(product?.specs?.aspectRatio  ? [['Aspect Ratio',     product.specs.aspectRatio]]  : []),
+                    ...(product?.specs?.rimSize      ? [['Rim Size',         product.specs.rimSize]]      : []),
+                    ...(product?.specs?.speedIndex   ? [['Speed Index',      product.specs.speedIndex]]   : []),
+                    ...(product?.specs?.loadIndex    ? [['Load Index',       product.specs.loadIndex]]    : []),
+                    ...(product?.specs?.construction ? [['Construction',     product.specs.construction]] : []),
+                  ] : []),
+                  ...(product?.specs?.grip        ? [['Grip Level',       product.specs.grip]]        : []),
+                  ...(product?.specs?.durability  ? [['Durability Class', product.specs.durability]]  : []),
+                  ...(product?.specs?.warranty    ? [['Warranty',         product.specs.warranty]]    : []),
+                ].filter(([, v]) => v != null && v !== '').map(([key, val], i, arr) => (
                   <tr key={key} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--border)' }}>
                     <td style={{ padding: '20px 0', color: 'var(--text-muted)', width: '40%' }}>{key}</td>
                     <td style={{ padding: '20px 0', fontWeight: '700' }}>{val}</td>
