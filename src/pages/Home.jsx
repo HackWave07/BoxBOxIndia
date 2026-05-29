@@ -482,29 +482,17 @@ const ReviewImageCard = ({ src, alt }) => {
 
 export default function Home() {
   const [featured, setFeatured] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const featuredFallbackSlots = homeFeaturedFallbacks.slice(featured.length, 4);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const { data } = await axios.get(`${API_URL}/products`);
-        
-        let productsArray = [];
-        if (Array.isArray(data)) {
-          productsArray = data;
-        } else if (data && Array.isArray(data.data)) {
-          productsArray = data.data;
-        }
-        
+        const productsArray = Array.isArray(data) ? data : (data?.data || []);
         setFeatured(productsArray.filter(product => product?.featuredOnHome).slice(0, 4));
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching home data', error);
-        setFeatured([]);
-        setLoading(false);
       }
     };
     fetchData();
@@ -599,18 +587,12 @@ export default function Home() {
         </div>
         
         <div className="responsive-grid" style={{ gap: '24px' }}>
-          {loading ? (
-            [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
-          ) : (
-            <>
-              {featured.map(product => (
-                <ProductCard key={product._id || product.id} product={{...product, id: product._id || product.id}} />
-              ))}
-              {featuredFallbackSlots.map(item => (
-                <HomeFeaturedFallbackCard key={item.title} item={item} />
-              ))}
-            </>
-          )}
+          {featured.map(product => (
+            <ProductCard key={product._id || product.id} product={{...product, id: product._id || product.id}} />
+          ))}
+          {featuredFallbackSlots.map(item => (
+            <HomeFeaturedFallbackCard key={item.title} item={item} />
+          ))}
         </div>
         </div>
       </section>
