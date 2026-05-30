@@ -39,13 +39,24 @@ export default function ProductCard({ product }) {
           <h3 className="product-card-title">{product.name}</h3>
         </Link>
         
-        {/* Rating */}
+        {/* Rating — real data only */}
         <div className="product-card-rating">
           {Array(5).fill().map((_, i) => (
-            <Star key={i} size={13} fill={i < Math.round(product.rating || 4) ? 'var(--text)' : 'transparent'} color="var(--text)" />
+            <Star
+              key={i}
+              size={13}
+              fill={product.reviews > 0 && i < Math.round(product.rating) ? 'var(--text)' : 'transparent'}
+              color={product.reviews > 0 ? 'var(--text)' : 'var(--border)'}
+            />
           ))}
-          <span style={{ marginLeft: '4px' }}>{product.rating || '4.5'}</span>
-          <span className="product-card-rating-reviews">({product.reviews || '200'}+ reviews)</span>
+          {product.reviews > 0 ? (
+            <>
+              <span style={{ marginLeft: '4px' }}>{Number(product.rating).toFixed(1)}</span>
+              <span className="product-card-rating-reviews">({product.reviews} reviews)</span>
+            </>
+          ) : (
+            <span style={{ marginLeft: '6px', fontSize: '11px', color: 'var(--text-muted)' }}>No reviews yet</span>
+          )}
         </div>
 
         {/* Trust Badges */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Edit2, Trash2, Plus, X, Loader2 } from 'lucide-react';
+import { Edit2, Trash2, Plus, X, Loader2, FileSpreadsheet } from 'lucide-react';
+import BulkImportModal from '../components/BulkImportModal';
 import { useToast } from '../context/ToastContext';
 import { resolveMediaUrl } from '../utils/media';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +20,7 @@ export default function Admin() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const initialForm = {
     type: 'tyre', name: '', brand: '', price: '', category: '', tyreSize: '', stock: '', images: [''], description: '',
@@ -206,6 +208,9 @@ export default function Admin() {
           <a href="/admin/orders" style={{ padding: '10px 20px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', fontWeight: '700', fontSize: '14px', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
             Orders
           </a>
+          <button onClick={() => setImportModalOpen(true)} style={{ padding: '10px 20px', background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text)', fontWeight: '700', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FileSpreadsheet size={16} /> Bulk Import
+          </button>
           <button onClick={() => openModal()} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={18} /> New Product
           </button>
@@ -408,6 +413,13 @@ export default function Admin() {
           </div>
         </div>
       )}
+      {importModalOpen && (
+        <BulkImportModal
+          onClose={() => setImportModalOpen(false)}
+          onImportDone={fetchProducts}
+        />
+      )}
+
       <style dangerouslySetInnerHTML={{
         __html: `
         .animate-spin { animation: spin 1s linear infinite; }

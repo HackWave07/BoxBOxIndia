@@ -29,7 +29,12 @@ const productSchema = new mongoose.Schema({
     sku: { type: String },
     stock: { type: Boolean, default: true }
   }],
-  relatedParts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
+  relatedParts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  // Extended fields for bulk import (all optional for backward compat)
+  mrp: { type: Number, default: null },
+  seoTitle: { type: String, default: '' },
+  seoDescription: { type: String, default: '' },
+  importKey: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

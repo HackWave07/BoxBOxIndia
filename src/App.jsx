@@ -17,6 +17,7 @@ import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
 import WhatsAppButton from './components/WhatsAppButton';
 import AISupportChat from './components/AISupportChat';
+import TimedAuthPopup from './components/TimedAuthPopup';
 import ScrollToTop from './components/ScrollToTop';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -72,6 +73,7 @@ function App() {
         <Footer />
         <AISupportChat />
         <WhatsAppButton />
+        <TimedAuthPopup />
       </div>
     </Router>
     </ErrorBoundary>

@@ -191,6 +191,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const importRoutes = require('./routes/importRoutes');
 
 // ─── Mount Routers ────────────────────────────────────────────────────────────
 // Mount routes with and without '/api' prefix to prevent 404s if VITE_API_URL is just the root URL
@@ -211,6 +212,9 @@ app.use('/reviews', reviewRoutes);
 
 app.use('/api/chat', chatRoutes);
 app.use('/chat', chatRoutes);
+
+app.use('/api/import', importRoutes);
+app.use('/import', importRoutes);
 
 // ─── Seed / Reset Admin User ──────────────────────────────────────────────────
 // In development: always resets the admin password so a stale or

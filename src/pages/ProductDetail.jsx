@@ -113,8 +113,8 @@ export default function ProductDetail() {
               },
               "aggregateRating": product.reviews > 0 ? {
                 "@type": "AggregateRating",
-                "ratingValue": product.rating || "5.0",
-                "reviewCount": product.reviews || "1"
+                "ratingValue": product.rating || 0,
+                "reviewCount": product.reviews || 0
               } : undefined
             },
             {
